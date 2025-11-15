@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import AdminPageHeader from '../components/AdminPageHeader';
-import Footer from '../components/Footer';
 
 const driverDirectory = {
   james: { name: 'James P.', phone: '+44 7700 900123', email: 'james@velvetdrivers.co.uk' },
