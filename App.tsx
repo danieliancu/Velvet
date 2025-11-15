@@ -22,6 +22,8 @@ import RefundPolicyPage from './pages/RefundPolicyPage';
 import SafetyPolicyPage from './pages/SafetyPolicyPage';
 import DriverHubPage from './pages/DriverHubPage';
 import BookingPage from './pages/BookingPage';
+import OlderBookingsPage from './pages/OlderBookingsPage';
+import ContactPage from './pages/ContactPage';
 
 // --- AUTH CONTEXT ---
 interface AuthContextType {
@@ -133,6 +135,8 @@ function App() {
             <Route path="/refund-policy" element={<RefundPolicyPage />} />
             <Route path="/safety-policy" element={<SafetyPolicyPage />} />
             <Route path="/driver-hub" element={<DriverHubPage />} />
+            <Route path="/older-bookings" element={<OlderBookingsPage />} />
+            <Route path="/contact" element={<ContactPage />} />
 
             <Route path="/client/dashboard" element={
               <ProtectedRoute allowedRoles={[Role.CLIENT]}>

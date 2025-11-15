@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import Footer from '../components/Footer';
+import { useNavigate } from 'react-router-dom';
+import PageShell from '../components/PageShell';
 import BookingInput from '../components/BookingInput';
 import BookingSelect from '../components/BookingSelect';
 import BookingTextArea from '../components/BookingTextArea';
@@ -70,16 +70,8 @@ const BookingPage: React.FC = () => {
     };
 
     return (
-        <div className="min-h-screen w-full bg-black text-white flex flex-col p-4 relative overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-950/60 via-black to-black opacity-90"></div>
-            <div className="absolute top-10 left-10">
-                <Link to="/" className="z-10 opacity-70 hover:opacity-100 transition-opacity">
-                    <img src="/assets/logo.png" alt="Velvet Drivers Logo" className="w-[180px] h-auto" />
-                </Link>
-            </div>
-
-            <main className="flex-grow flex items-center justify-center py-24">
-                <form onSubmit={handleSubmitBooking} className="relative z-10 w-full max-w-3xl bg-[#1c1010]/80 border border-amber-900/50 rounded-2xl shadow-2xl shadow-red-950/50 backdrop-blur-lg p-8 space-y-8">
+        <PageShell mainClassName="flex items-center justify-center py-24">
+            <form onSubmit={handleSubmitBooking} className="relative z-10 w-full max-w-3xl bg-[#1c1010]/80 border border-amber-900/50 rounded-2xl shadow-2xl shadow-red-950/50 backdrop-blur-lg p-8 space-y-8">
                     
                     {/* Journey Details Section */}
                     <div>
@@ -87,10 +79,10 @@ const BookingPage: React.FC = () => {
                         <p className="text-sm text-gray-400 mb-6">No account needed — log in to manage bookings later.</p>
                         
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                            <div className="md:col-span-2">
+                            <div className="flex flex-col gap-1 w-full">
                                 <BookingInput label="Pickup" id="pickup" placeholder="Address or postcode" value={pickup} onChange={e => setPickup(e.target.value)} required />
                             </div>
-                            <div className="md:col-span-2 space-y-3">
+                            <div className="flex flex-col gap-1 w-full space-y-3">
                                 {dropOffs.map((stop, index) => (
                                     <div key={index} className="flex items-center gap-2">
                                         <div className="flex-grow">
@@ -176,9 +168,7 @@ const BookingPage: React.FC = () => {
                         </button>
                     </div>
                 </form>
-            </main>
-            <Footer />
-        </div>
+        </PageShell>
     );
 };
 

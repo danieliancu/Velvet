@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
-import Footer from '../components/Footer';
+import PageShell from '../components/PageShell';
 
 import ClientHistory, { mockJourneys } from './client-dashboard/ClientHistory';
 import ClientComplain from './client-dashboard/ClientComplain';
@@ -66,52 +66,49 @@ const ClientDashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
-      <div className="w-full flex-grow p-4 sm:p-6 md:p-8">
+    <PageShell mainClassName="flex flex-col px-4 sm:px-6 md:px-8 py-10">
+      <div className="w-full flex-grow">
         <div className="max-w-7xl mx-auto">
           <header className="mb-8">
             <div className="flex flex-wrap justify-between items-center gap-4 pb-4 border-b border-gray-800">
-                <div>
-                  <h1 className="text-3xl font-bold font-display text-amber-400">Client Dashboard</h1>
-                  <p className="text-gray-400">Welcome back, {user?.name}</p>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 font-semibold bg-transparent border border-amber-400 text-amber-400 rounded-md hover:bg-amber-400 hover:text-black transition-colors"
-                >
-                  Logout
-                </button>
+              <div>
+                <h1 className="text-3xl font-bold font-display text-amber-400">Client Dashboard</h1>
+                <p className="text-gray-400">Welcome back, {user?.name}</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 font-semibold bg-transparent border border-amber-400 text-amber-400 rounded-md hover:bg-amber-400 hover:text-black transition-colors"
+              >
+                Logout
+              </button>
             </div>
-             <nav className="mt-6 flex flex-wrap items-center gap-2 pb-2">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`relative px-4 py-2 text-sm font-semibold rounded-md transition-colors whitespace-nowrap ${
-                            activeTab === tab
-                            ? 'bg-amber-400 text-black shadow-md shadow-amber-400/20'
-                            : 'bg-gray-800/50 text-amber-300 hover:bg-gray-700/50'
-                        }`}
-                    >
-                        {tab}
-                    </button>
-                ))}
+            <nav className="mt-6 flex flex-wrap items-center gap-2 pb-2">
+              {tabs.map((tab) => (
                 <button
-                    onClick={() => navigate('/booking')}
-                    className="ml-auto px-6 py-2 text-sm font-semibold rounded-md transition-colors whitespace-nowrap bg-amber-500 text-black shadow-lg shadow-amber-500/30 hover:bg-amber-400 transform hover:scale-105"
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`relative px-4 py-2 text-sm font-semibold rounded-md transition-colors whitespace-nowrap ${
+                    activeTab === tab
+                      ? 'bg-amber-400 text-black shadow-md shadow-amber-400/20'
+                      : 'bg-gray-800/50 text-amber-300 hover:bg-gray-700/50'
+                  }`}
                 >
-                    Book a Journey
+                  {tab}
                 </button>
+              ))}
+              <button
+                onClick={() => navigate('/booking')}
+                className="px-6 py-2 text-sm font-semibold rounded-md transition-colors whitespace-nowrap bg-amber-500 text-black shadow-lg shadow-amber-500/30 hover:bg-amber-400 transform hover:scale-105"
+              >
+                Book a Journey
+              </button>
             </nav>
           </header>
 
-          <main>
-            {renderContent()}
-          </main>
+          <main>{renderContent()}</main>
         </div>
       </div>
-      <Footer />
-    </div>
+    </PageShell>
   );
 };
 

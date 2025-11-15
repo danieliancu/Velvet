@@ -11,7 +11,7 @@ const Logo = () => (
 
 const Header: React.FC = () => {
     return (
-        <header className="absolute top-0 left-0 right-0 p-6 md:p-8 z-50">
+        <header className="relative top-0 left-0 right-0 p-6 md:p-8 pb-0 md:pb-0 z-50">
             <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent absolute top-0 left-0"></div>
             <div className="max-w-7xl mx-auto flex justify-center">
                 <Logo />

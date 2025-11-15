@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useBookings } from '../App';
@@ -43,49 +42,53 @@ const AdminDashboardPage: React.FC = () => {
               Logout
             </button>
           </header>
-          
+
           <main className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="md:col-span-2 bg-gray-900/50 border border-gray-800 rounded-lg p-6">
-                  <h2 className="text-xl font-bold mb-4">Live Bookings</h2>
-                  {bookings.length > 0 ? (
-                    <ul>
-                      {bookings.map((booking) => (
-                        <li key={booking.id} className="flex justify-between items-center p-3 hover:bg-gray-800/50 rounded-md">
-                            <span>{booking.id}: {booking.pickup} to {booking.dropOffs[0]}</span>
-                            <span className={getStatusColor(booking.status)}>{booking.status}</span>
-                        </li>
-                      )).reverse()}
-                    </ul>
-                  ) : (
-                    <p className="text-gray-400 text-center py-8">No bookings yet.</p>
-                  )}
-              </div>
-              <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-6">
-                  <h2 className="text-xl font-bold mb-4">Driver Status</h2>
-                  <ul>
-                      <li className="flex justify-between items-center p-2">
-                          <span>James P.</span>
-                          <span className="text-green-400 flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-green-400"></span>
-                              Available
-                          </span>
+            <div className="md:col-span-2 bg-gray-900/50 border border-gray-800 rounded-lg p-6">
+              <h2 className="text-xl font-bold mb-4">Live Bookings</h2>
+              {bookings.length > 0 ? (
+                <ul>
+                  {bookings
+                    .map((booking) => (
+                      <li key={booking.id} className="flex justify-between items-center p-3 hover:bg-gray-800/50 rounded-md">
+                        <span>
+                          {booking.id}: {booking.pickup} to {booking.dropOffs[0]}
+                        </span>
+                        <span className={getStatusColor(booking.status)}>{booking.status}</span>
                       </li>
-                      <li className="flex justify-between items-center p-2">
-                          <span>Robert K.</span>
-                          <span className="text-red-400 flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-red-400"></span>
-                              On Job
-                          </span>
-                      </li>
-                      <li className="flex justify-between items-center p-2">
-                          <span>David C.</span>
-                          <span className="text-gray-400 flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-gray-400"></span>
-                              Offline
-                          </span>
-                      </li>
-                  </ul>
-              </div>
+                    ))
+                    .reverse()}
+                </ul>
+              ) : (
+                <p className="text-gray-400 text-center py-8">No bookings yet.</p>
+              )}
+            </div>
+            <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-6">
+              <h2 className="text-xl font-bold mb-4">Driver Status</h2>
+              <ul>
+                <li className="flex justify-between items-center p-2">
+                  <span>James P.</span>
+                  <span className="text-green-400 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-green-400"></span>
+                    Available
+                  </span>
+                </li>
+                <li className="flex justify-between items-center p-2">
+                  <span>Robert K.</span>
+                  <span className="text-red-400 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-red-400"></span>
+                    On Job
+                  </span>
+                </li>
+                <li className="flex justify-between items-center p-2">
+                  <span>David C.</span>
+                  <span className="text-gray-400 flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-gray-400"></span>
+                    Offline
+                  </span>
+                </li>
+              </ul>
+            </div>
           </main>
         </div>
       </div>

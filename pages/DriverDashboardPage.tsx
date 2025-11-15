@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
 import { Clock, User, DollarSign, Car } from 'lucide-react';
-import Footer from '../components/Footer';
+import PageShell from '../components/PageShell';
 import DashboardInput from '../components/DashboardInput';
 
 const mockJobs = [
@@ -80,7 +80,7 @@ const DriverJobs: React.FC = () => (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {mockCompletedJobs.map(job => (
                 <div key={job.id} className="bg-gray-900/50 border border-gray-800 rounded-lg p-6 space-y-4 opacity-70">
-                    <div className="flex justify-between items-start">
+                    <div className="flex flex-col md:flex-row md:justify-between items-start gap-2">
                         <div>
                             <h3 className="text-xl font-bold text-amber-400/80">{job.pickup}</h3>
                             <p className="text-lg text-white/80">to {job.destination}</p>
@@ -243,10 +243,11 @@ const CarDetailItem: React.FC<{ label: string, value: string }> = ({ label, valu
 const UploadItemWithExpiry: React.FC<{ label: string }> = ({ label }) => {
     const id = label.toLowerCase().replace(/ /g, '-');
     return (
-        <div className="flex flex-col sm:flex-row justify-between items-center py-2 border-b border-amber-900/40 gap-2">
+        <div className="flex flex-col sm:flex-row justify-between py-2 border-b border-amber-900/40 gap-2">
             <span className="text-white/90 text-sm flex-grow">{label}</span>
             <div className="flex items-center gap-2">
-                <input type="date" className="bg-black/40 border border-amber-900/60 rounded-md px-2 py-1 text-xs text-white w-32" />
+                <span style={{ fontSize:"12px" }}>Expiring:</span> 
+                <input type="date" className="bg-gray-100/90 border border-amber-900/60 rounded-md px-2 py-1 text-xs text-black w-32" />
                 <label htmlFor={id} className="cursor-pointer bg-amber-500 text-black px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-amber-400 transition-colors">
                     Upload
                 </label>
@@ -360,51 +361,48 @@ const DriverDashboardPage: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
-      <div className="w-full flex-grow p-4 sm:p-6 md:p-8">
+    <PageShell mainClassName="flex flex-col px-4 sm:px-6 md:px-8 py-10">
+      <div className="w-full flex-grow">
         <div className="max-w-7xl mx-auto">
           <header className="mb-8">
             <div className="flex flex-wrap justify-between items-center gap-4 pb-4 border-b border-gray-800">
-                <div>
-                  <h1 className="text-3xl font-bold font-display text-amber-400">Driver Dashboard</h1>
-                  <p className="text-gray-400">Welcome back, {user?.name}</p>
-                </div>
-                <button
-                  onClick={handleLogout}
-                  className="px-4 py-2 font-semibold bg-transparent border border-amber-400 text-amber-400 rounded-md hover:bg-amber-400 hover:text-black transition-colors"
-                >
-                  Logout
-                </button>
+              <div>
+                <h1 className="text-3xl font-bold font-display text-amber-400">Driver Dashboard</h1>
+                <p className="text-gray-400">Welcome back, {user?.name}</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="px-4 py-2 font-semibold bg-transparent border border-amber-400 text-amber-400 rounded-md hover:bg-amber-400 hover:text-black transition-colors"
+              >
+                Logout
+              </button>
             </div>
-             <nav className="mt-6 flex items-center space-x-2 overflow-x-auto pb-2">
-                {tabs.map((tab) => (
-                    <button
-                        key={tab}
-                        onClick={() => setActiveTab(tab)}
-                        className={`relative px-4 py-2 text-sm font-semibold rounded-md transition-colors whitespace-nowrap ${
-                            activeTab === tab
-                            ? 'bg-amber-400 text-black shadow-md shadow-amber-400/20'
-                            : 'bg-gray-800/50 text-amber-300 hover:bg-gray-700/50'
-                        }`}
-                    >
-                        {tab}
-                        {tab === 'Jobs' && mockJobs.length > 0 && (
-                            <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white">
-                                {mockJobs.length}
-                            </span>
-                        )}
-                    </button>
-                ))}
+            <nav className="mt-6 flex items-center space-x-2 overflow-x-auto pb-2">
+              {tabs.map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`relative px-4 py-2 text-sm font-semibold rounded-md transition-colors whitespace-nowrap ${
+                    activeTab === tab
+                      ? 'bg-amber-400 text-black shadow-md shadow-amber-400/20'
+                      : 'bg-gray-800/50 text-amber-300 hover:bg-gray-700/50'
+                  }`}
+                >
+                  {tab}
+                  {tab === 'Jobs' && mockJobs.length > 0 && (
+                    <span className="absolute -top-0 -right-0 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white">
+                      {mockJobs.length}
+                    </span>
+                  )}
+                </button>
+              ))}
             </nav>
           </header>
 
-          <main>
-            {renderContent()}
-          </main>
+          <main>{renderContent()}</main>
         </div>
       </div>
-      <Footer />
-    </div>
+    </PageShell>
   );
 };
 

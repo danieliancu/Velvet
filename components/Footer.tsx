@@ -16,9 +16,12 @@ const Footer: React.FC = () => {
             <div className="max-w-7xl mx-auto border-t border-white/10 pt-10">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center md:text-left">
                     <div>
-                        <h4 className="font-bold font-display text-white text-lg mb-4">Company</h4>
+                    <h4 className="font-bold font-display text-white text-lg mb-4">Company</h4>
                         <ul className="space-y-2">
-                           <FooterLink to="/safety-policy">Safety</FooterLink>
+                           <FooterLink to="/client/login">Client</FooterLink>
+                           <FooterLink to="/driver/login">Driver</FooterLink>
+                           <FooterLink to="/booking">Booking</FooterLink>
+                           <FooterLink to="/contact">Contact</FooterLink>
                         </ul>
                     </div>
                     <div>
@@ -33,6 +36,7 @@ const Footer: React.FC = () => {
                     <div>
                         <h4 className="font-bold font-display text-white text-lg mb-4">Support</h4>
                         <ul className="space-y-2">
+                            <FooterLink to="/safety-policy">Safety</FooterLink>
                             <FooterLink to="/complaints-policy">Complaints</FooterLink>
                             <FooterLink to="/refund-policy">Refund & Cancellation</FooterLink>
                         </ul>

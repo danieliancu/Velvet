@@ -1,0 +1,104 @@
+import React, { useMemo, useState } from 'react';
+import { Search } from 'lucide-react';
+import { olderBookingsData, OlderBooking } from '../data/olderBookings';
+
+const formatDateHeading = (date: string) => {
+  const parsed = new Date(date);
+  return isNaN(parsed.getTime())
+    ? date
+    : parsed.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' });
+};
+
+const OlderBookingsList: React.FC<{ className?: string }> = ({ className = '' }) => {
+  const [query, setQuery] = useState('');
+
+  const filteredBookings = useMemo(() => {
+    if (!query.trim()) {
+      return olderBookingsData;
+    }
+    const searchTerm = query.toLowerCase();
+    return olderBookingsData.filter((booking) => {
+      const haystack = `${booking.id} ${booking.pickup} ${booking.dropOffs.join(' ')} ${booking.passengerName} ${booking.driverName} ${booking.vehicle} ${booking.notes}`.toLowerCase();
+      return haystack.includes(searchTerm);
+    });
+  }, [query]);
+
+  const groupedBookings = useMemo(() => {
+    const map = new Map<string, OlderBooking[]>();
+    filteredBookings.forEach((booking) => {
+      const existing = map.get(booking.date) ?? [];
+      map.set(booking.date, [...existing, booking]);
+    });
+    return Array.from(map.entries()).sort((a, b) => b[0].localeCompare(a[0]));
+  }, [filteredBookings]);
+
+  return (
+    <div className={className}>
+      <div className="relative mb-4">
+        <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
+          <Search size={16} />
+        </span>
+        <input
+          type="text"
+          value={query}
+          onChange={(event) => setQuery(event.target.value)}
+          placeholder="Search by booking ID, pickup, passenger or driver..."
+          className="w-full rounded-2xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-gray-500 focus:border-amber-400 focus:outline-none"
+        />
+      </div>
+
+      {groupedBookings.length === 0 ? (
+        <div className="rounded-2xl border border-white/10 bg-black/40 p-8 text-center text-gray-400">
+          No bookings match your search. Try a different keyword.
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {groupedBookings.map(([date, bookings]) => (
+            <div key={date} className="space-y-4 rounded-2xl border border-white/10 bg-black/30 p-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-wide text-gray-400">Date</p>
+                  <h2 className="text-xl font-semibold text-white">{formatDateHeading(date)}</h2>
+                </div>
+                <p className="text-sm text-gray-400">{bookings.length} bookings</p>
+              </div>
+
+              <div className="space-y-4">
+                {bookings.map((booking) => (
+                  <div key={booking.id} className="rounded-2xl border border-white/10 bg-black/60 p-4 shadow-inner shadow-black/40">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div>
+                        <p className="text-xs uppercase tracking-wider text-amber-300">Booking #{booking.id}</p>
+                        <h3 className="text-xl font-semibold text-white">{booking.pickup}</h3>
+                        <p className="text-sm text-gray-400">{booking.dropOffs.join(' → ')}</p>
+                      </div>
+                      <p className="text-sm text-gray-400">
+                        {booking.time} · {booking.vehicle}
+                      </p>
+                    </div>
+
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2 text-sm text-gray-300">
+                      <p>
+                        <span className="text-white/70">Passenger:</span> {booking.passengerName}
+                      </p>
+                      <p>
+                        <span className="text-white/70">Driver:</span> {booking.driverName}
+                      </p>
+                    </div>
+
+                    <div className="mt-4 space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Notes</p>
+                      <p className="text-sm text-gray-400">{booking.notes}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default OlderBookingsList;
