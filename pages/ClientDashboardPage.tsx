@@ -82,7 +82,7 @@ const ClientDashboardPage: React.FC = () => {
                 Logout
               </button>
             </div>
-            <nav className="mt-6 flex flex-wrap items-center gap-2 pb-2">
+            <nav className="mt-6 flex items-center space-x-2 overflow-x-auto pb-2">
               {tabs.map((tab) => (
                 <button
                   key={tab}

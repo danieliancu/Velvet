@@ -10,6 +10,7 @@ import DriverSignUpPage from './pages/DriverSignUpPage';
 import DriverDashboardPage from './pages/DriverDashboardPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import AdminDriversPage from './pages/AdminDriversPage';
 import { Role } from './types';
 import type { User, Booking } from './types';
 
@@ -151,6 +152,11 @@ function App() {
             <Route path="/admin/dashboard" element={
               <ProtectedRoute allowedRoles={[Role.ADMIN]}>
                 <AdminDashboardPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/drivers" element={
+              <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+                <AdminDriversPage />
               </ProtectedRoute>
             } />
 

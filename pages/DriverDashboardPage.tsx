@@ -143,7 +143,7 @@ const DriverProfile = () => {
                  <div className="space-y-1">
                     <UploadItem label="PCO Licence No" />
                     <UploadItem label="Driving License front" />
-                    <UploadItem label="Driving License verso" />
+                    <UploadItem label="Driving License back side" />
                  </div>
                  <p className="text-xs text-amber-200/60 mt-6">
                     We store all documents securely. Reminders are sent before expiry.

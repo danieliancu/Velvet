@@ -30,7 +30,7 @@ const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({ active, liveBadgeCoun
     {
       id: 'drivers',
       label: 'Drivers',
-      to: '/driver/dashboard'
+      to: '/admin/drivers'
     }
   ] as const;
 
