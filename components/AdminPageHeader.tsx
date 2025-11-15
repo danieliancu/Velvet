@@ -53,9 +53,10 @@ const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({ active, liveBadgeCoun
             <p className="text-gray-400">Welcome, Administrator</p>
           </div>
         </div>
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-5">
-          <div className="flex flex-wrap items-center gap-3">
-            {navItems.map((item) => {
+        <div className="flex items-center gap-3 pt-5">
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-nowrap gap-3 overflow-x-auto pr-2">
+              {navItems.map((item) => {
               const isActive = active === item.id;
               return (
                 <button
@@ -76,7 +77,8 @@ const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({ active, liveBadgeCoun
                   )}
                 </button>
               );
-            })}
+             })}
+           </div>
           </div>
           <div>
             <button
