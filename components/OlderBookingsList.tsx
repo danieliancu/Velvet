@@ -2,6 +2,14 @@ import React, { useMemo, useState } from 'react';
 import { Search } from 'lucide-react';
 import { olderBookingsData, OlderBooking } from '../data/olderBookings';
 
+const driverContacts: Record<string, { phone: string; email: string }> = {
+  'James P.': { phone: '+44 7700 900123', email: 'james@velvetdrivers.co.uk' },
+  'Robert K.': { phone: '+44 7700 900234', email: 'robert@velvetdrivers.co.uk' },
+  'David C.': { phone: '+44 7700 900345', email: 'david@velvetdrivers.co.uk' },
+  'Anna B.': { phone: '+44 7700 900456', email: 'anna@velvetdrivers.co.uk' },
+  'Oliver T.': { phone: '+44 7700 900567', email: 'oliver@velvetdrivers.co.uk' }
+};
+
 const formatDateHeading = (date: string) => {
   const parsed = new Date(date);
   return isNaN(parsed.getTime())
@@ -12,7 +20,7 @@ const formatDateHeading = (date: string) => {
 const OlderBookingsList: React.FC<{ className?: string }> = ({ className = '' }) => {
   const [query, setQuery] = useState('');
 
-  const filteredBookings = useMemo(() => {
+  const filteredBookings = useMemo<OlderBooking[]>(() => {
     if (!query.trim()) {
       return olderBookingsData;
     }
@@ -64,34 +72,45 @@ const OlderBookingsList: React.FC<{ className?: string }> = ({ className = '' })
               </div>
 
               <div className="space-y-4">
-                {bookings.map((booking) => (
-                  <div key={booking.id} className="rounded-2xl border border-white/10 bg-black/60 p-4 shadow-inner shadow-black/40">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                      <div>
-                        <p className="text-xs uppercase tracking-wider text-amber-300">Booking #{booking.id}</p>
-                        <h3 className="text-xl font-semibold text-white">{booking.pickup}</h3>
-                        <p className="text-sm text-gray-400">{booking.dropOffs.join(' → ')}</p>
+                {bookings.map((booking) => {
+                  const driverInfo = driverContacts[booking.driverName];
+                  return (
+                    <div
+                      key={booking.id}
+                      className="rounded-2xl border border-white/10 bg-black/60 p-5 shadow-inner shadow-black/40"
+                    >
+                      <div className="flex flex-col gap-6 lg:flex-row">
+                        <div className="flex-1 space-y-3">
+                          <div className="flex items-center justify-between">
+                            <p className="text-xs uppercase tracking-wider text-amber-300">
+                              Booking #{booking.id}
+                            </p>
+                            <p className="text-sm text-gray-400">
+                              {booking.time} · {booking.vehicle}
+                            </p>
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-semibold text-white">{booking.pickup}</h3>
+                            <p className="text-sm text-gray-400">{booking.dropOffs.join(' · ')}</p>
+                          </div>
+                          <p className="text-sm text-gray-300">
+                            Passenger: {booking.passengerName} · Phone: {booking.passengerPhone}
+                          </p>
+                          <p className="text-xs text-gray-400">Notes: {booking.notes}</p>
+                        </div>
+                        <div className="space-y-2 rounded-2xl border border-white/10 bg-black/40 p-4 lg:basis-[45%]">
+                          <p className="text-sm font-semibold text-white">{booking.driverName}</p>
+                          {driverInfo && (
+                            <>
+                              <p className="text-xs text-gray-400">Phone: {driverInfo.phone}</p>
+                              <p className="text-xs text-gray-400">Email: {driverInfo.email}</p>
+                            </>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-sm text-gray-400">
-                        {booking.time} · {booking.vehicle}
-                      </p>
                     </div>
-
-                    <div className="mt-3 grid gap-3 sm:grid-cols-2 text-sm text-gray-300">
-                      <p>
-                        <span className="text-white/70">Passenger:</span> {booking.passengerName}
-                      </p>
-                      <p>
-                        <span className="text-white/70">Driver:</span> {booking.driverName}
-                      </p>
-                    </div>
-
-                    <div className="mt-4 space-y-2">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-gray-400">Notes</p>
-                      <p className="text-sm text-gray-400">{booking.notes}</p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
