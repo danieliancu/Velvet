@@ -19,25 +19,21 @@ const ClientSignUpPage: React.FC = () => {
     };
 
     return (
-        <FormLayout title="Book & Sign Up">
-            <form onSubmit={handleSignUp} className="space-y-2">
-                <h3 className="text-lg font-semibold text-gray-300 pt-4 pb-2 border-b border-gray-700">Journey Details</h3>
-                <Input id="pickup" label="Pickup Location" type="text" required />
-                <Input id="destination" label="Destination" type="text" required />
-                <Input id="date" label="Date & Time" type="datetime-local" required />
-
-                <h3 className="text-lg font-semibold text-gray-300 pt-4 pb-2 border-b border-gray-700">Personal Details</h3>
+        <FormLayout title="Sign Up">
+            <form onSubmit={handleSignUp} className="space-y-4">
+                <h3 className="text-lg font-semibold text-gray-300 pb-2">Personal Details</h3>
                 <Input id="name" label="Full Name" type="text" required />
                 <Input id="email" label="Email Address" type="email" required />
                 <Input id="phone" label="Phone Number" type="tel" required />
                 <Input id="password" label="Create Password" type="password" required />
+                <Input id="repeatPassword" label="Repeat Password" type="password" required />
 
                 <div className="pt-4">
                     <button
                         type="submit"
                         className="w-full px-8 py-3 text-lg font-semibold bg-amber-500 text-black rounded-md hover:bg-amber-400 transition-all duration-300 transform hover:scale-105 shadow-[0_0_15px_rgba(251,191,36,0.5)]"
                     >
-                        Confirm Booking & Create Account
+                        Create Account
                     </button>
                 </div>
                 <p className="text-center text-sm text-gray-400 pt-4">

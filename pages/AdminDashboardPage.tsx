@@ -1,15 +1,30 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../App';
+import { useAuth, useBookings } from '../App';
 import Footer from '../components/Footer';
 
 const AdminDashboardPage: React.FC = () => {
-  const { user, logout } = useAuth();
+  const { logout } = useAuth();
+  const { bookings } = useBookings();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Pending Confirmation':
+        return 'text-yellow-400';
+      case 'Driver Assigned':
+        return 'text-green-400';
+      case 'Completed':
+        return 'text-blue-400';
+      default:
+        return 'text-gray-400';
+    }
   };
 
   return (
@@ -32,20 +47,18 @@ const AdminDashboardPage: React.FC = () => {
           <main className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="md:col-span-2 bg-gray-900/50 border border-gray-800 rounded-lg p-6">
                   <h2 className="text-xl font-bold mb-4">Live Bookings</h2>
-                  <ul>
-                      <li className="flex justify-between items-center p-3 hover:bg-gray-800/50 rounded-md">
-                          <span>Booking #1047: LHR T5 -> Ritz Hotel</span>
-                          <span className="text-yellow-400">Client Confirmation Pending</span>
-                      </li>
-                      <li className="flex justify-between items-center p-3 hover:bg-gray-800/50 rounded-md">
-                          <span>Booking #1046: J. Smith - City Airport</span>
-                          <span className="text-green-400">Driver Assigned</span>
-                      </li>
-                      <li className="flex justify-between items-center p-3 hover:bg-gray-800/50 rounded-md">
-                          <span>Booking #1045: Canary Wharf -> Mayfair</span>
-                          <span className="text-blue-400">Completed</span>
-                      </li>
-                  </ul>
+                  {bookings.length > 0 ? (
+                    <ul>
+                      {bookings.map((booking) => (
+                        <li key={booking.id} className="flex justify-between items-center p-3 hover:bg-gray-800/50 rounded-md">
+                            <span>{booking.id}: {booking.pickup} to {booking.dropOffs[0]}</span>
+                            <span className={getStatusColor(booking.status)}>{booking.status}</span>
+                        </li>
+                      )).reverse()}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-400 text-center py-8">No bookings yet.</p>
+                  )}
               </div>
               <div className="bg-gray-900/50 border border-gray-800 rounded-lg p-6">
                   <h2 className="text-xl font-bold mb-4">Driver Status</h2>

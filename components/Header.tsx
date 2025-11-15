@@ -3,13 +3,8 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 const Logo = () => (
-    <Link to="/" className="flex items-center gap-2 text-white z-10">
-        <div className="w-10 h-10 border border-amber-400 flex items-center justify-center font-display text-2xl font-bold text-amber-400">
-            V
-        </div>
-        <h1 className="font-display text-3xl tracking-wider uppercase">
-            Velvet Drivers
-        </h1>
+    <Link to="/" className="z-10">
+        <img src="/assets/logo.png" alt="Velvet Drivers Logo" className="w-[220px] h-auto" />
     </Link>
 );
 

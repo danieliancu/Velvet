@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
 import { Clock, User, DollarSign, Car } from 'lucide-react';
 import Footer from '../components/Footer';
+import DashboardInput from '../components/DashboardInput';
 
 const mockJobs = [
     { id: 'j1', client: 'Alice Wonderland', time: '14:30', pickup: 'Heathrow T5', destination: 'The Ritz Hotel', pay: 75.00 },
@@ -97,19 +98,6 @@ const DriverJobs: React.FC = () => (
         </div>
     </div>
 );
-
-const DetailsInput: React.FC<{ label: string, id: string, type?: string, value?: string, readOnly?: boolean }> = ({ label, id, ...props }) => (
-    <div>
-      <label htmlFor={id} className="block text-xs font-semibold text-amber-200/70 uppercase tracking-wider mb-2">
-        {label}
-      </label>
-      <input
-        id={id}
-        className="w-full bg-black/40 border border-amber-900/60 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500 disabled:opacity-50"
-        {...props}
-      />
-    </div>
-);
   
 const UploadItem: React.FC<{ label: string }> = ({ label }) => {
     const id = label.toLowerCase().replace(/ /g, '-');
@@ -130,18 +118,18 @@ const DriverProfile = () => {
             <div className="xl:col-span-3 bg-gradient-to-br from-[#1E1212] via-[#100808] to-black border border-amber-900/50 rounded-2xl p-8">
                 <h2 className="text-2xl font-bold font-display text-amber-400 mb-6">Your Details</h2>
                 <form className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <DetailsInput id="first-name" label="First Name" type="text" />
-                    <DetailsInput id="last-name" label="Last Name" type="text" />
-                    <DetailsInput id="email" label="Email" type="email" />
-                    <DetailsInput id="phone" label="Phone" type="tel" />
+                    <DashboardInput id="first-name" label="First Name" type="text" />
+                    <DashboardInput id="last-name" label="Last Name" type="text" />
+                    <DashboardInput id="email" label="Email" type="email" />
+                    <DashboardInput id="phone" label="Phone" type="tel" />
                     <div className="sm:col-span-2">
-                        <DetailsInput id="driving-license" label="Driving License" type="text" />
+                        <DashboardInput id="driving-license" label="Driving License" type="text" />
                     </div>
                     <div className="sm:col-span-2">
-                        <DetailsInput id="address" label="Address" type="text" />
+                        <DashboardInput id="address" label="Address" type="text" />
                     </div>
-                    <DetailsInput id="pco-licence-no" label="PCO Licence No" type="text" />
-                    <DetailsInput id="pco-expiry" label="PCO Expiry" type="date" />
+                    <DashboardInput id="pco-licence-no" label="PCO Licence No" type="text" />
+                    <DashboardInput id="pco-expiry" label="PCO Expiry" type="date" />
                      <div className="sm:col-span-2 mt-2 flex justify-start">
                         <button type="submit" className="px-10 py-2.5 font-semibold bg-amber-500 text-black rounded-lg hover:bg-amber-400 transition-colors">
                             Save
@@ -322,8 +310,8 @@ const CarsPage: React.FC = () => {
                         <p className="text-xs text-amber-200/60 mt-1">Link to DVLA API to find Make and Model.</p>
                     </div>
                     
-                    <DetailsInput id="make" label="Make" type="text" value={make} readOnly />
-                    <DetailsInput id="model" label="Model" type="text" value={model} readOnly />
+                    <DashboardInput id="make" label="Make" type="text" value={make} readOnly />
+                    <DashboardInput id="model" label="Model" type="text" value={model} readOnly />
 
                     <div className="pt-2">
                         <UploadItemWithExpiry label="MOT" />
