@@ -2,8 +2,15 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
 
+type NavItem = {
+  id: 'live' | 'older' | 'drivers' | 'awaiting' | 'notifications';
+  label: string;
+  to: string;
+  badge?: number;
+};
+
 type AdminPageHeaderProps = {
-  active: 'live' | 'older' | 'drivers';
+  active: NavItem['id'];
   liveBadgeCount?: number;
 };
 
@@ -15,7 +22,7 @@ const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({ active, liveBadgeCoun
   const { logout } = useAuth();
   const navigate = useNavigate();
 
-  const navItems = [
+  const navItems: NavItem[] = [
     {
       id: 'live',
       label: 'Live Bookings',
