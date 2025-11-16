@@ -17,7 +17,7 @@ const mockLiveBookings = [
     pickup: 'Heathrow Terminal 5',
     dropOff: 'The Ritz London',
     passenger: 'Alice Wonderland',
-    phone: '+44 7404 494690',
+    phone: '+44 7700 123456',
     notes: 'Flight BA909 - Meet Door 15',
     time: '10:00',
     date: '16/11/2025',
@@ -41,7 +41,7 @@ const mockLiveBookings = [
 const buildBookingSummary = (booking: (typeof mockLiveBookings)[number]) => {
   return `Time: ${booking.time}
 Date: ${booking.date}
-Passenger: ${booking.passenger}
+Passanger: ${booking.passenger}
 Phone: ${booking.phone}
 Pickup: ${booking.pickup}
 Drop-off: ${booking.dropOff}
@@ -139,26 +139,27 @@ const AdminDashboardPage: React.FC = () => {
                   return (
                     <article
                       key={booking.id}
-                      className="rounded-2xl border border-white/10 bg-black/40 p-5"
+                      className="flex flex-col md:flex-row rounded-2xl border border-white/10 bg-black/40 p-5 gap-12"
                     >
-                      <div className="flex flex-col gap-6 lg:flex-row">
+                      <div className="flex flex-col gap-6 lg:flex-column">
                         <div className="flex-1 lg:basis-[40%] space-y-3">
                           <p className="text-sm font-semibold tracking-wide text-white">{booking.id}</p>
                           <p className="text-sm text-gray-300">
                             Pickup: {booking.pickup} · Drop-off: {booking.dropOff}
                           </p>
-                          <p className="text-xs text-gray-400">
+                          <p className="text-sm text-gray-300">
                             Time: {booking.time} · Date: {booking.date}
                           </p>
-                          <p className="text-xs text-gray-400">
-                            Passenger: {booking.passenger} · Phone: {booking.phone}
+                          <p className="text-sm text-gray-300">
+                            Passanger: {booking.passenger} · Phone: {booking.phone}
                           </p>
-                          <p className="text-xs text-gray-400">
-                            Price:{'\u00A0\u00A0'}
+                          <p className="text-sm text-gray-300">
+                            Price:{'  '}
                             <span className="font-semibold text-white">{booking.priceDetails}</span>
                           </p>
                           <p className="text-xs text-gray-400">Notes: {booking.notes}</p>
-                            <div className="flex flex-wrap items-center gap-4 pt-2">
+                        </div>
+                        <div className="flex flex-wrap items-center gap-4 pt-2">
                               <div className="flex items-center gap-2">
                                 <span className="w-3 h-3 rounded-full bg-green-400"></span>
                                 <span className="text-sm font-semibold text-green-400">Client request</span>
@@ -346,7 +347,6 @@ const AdminDashboardPage: React.FC = () => {
                               );
                             })()}
                           </div>
-                      </div>
                     </article>
                   );
                 })}
