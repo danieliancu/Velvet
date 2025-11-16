@@ -57,7 +57,7 @@ const driverProfiles: DriverProfileData[] = [
   {
     id: 'james',
     name: 'James P.',
-    phone: '+44 7700 900123',
+    phone: '+447479666343',
     email: 'james@velvetdrivers.co.uk',
     address: '17 Fleet Street, London, EC4M 9AF',
     license: 'PCO-70934',

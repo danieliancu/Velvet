@@ -48,39 +48,11 @@ const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({ active, liveBadgeCoun
       </div>
       <div className="px-6 py-6">
         <div className="border-b border-gray-800/80 pb-6">
-          <div>
-            <h1 className="text-3xl font-display font-bold uppercase text-amber-400">Admin Dashboard</h1>
-            <p className="text-gray-400">Welcome, Administrator</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 pt-5">
-          <div className="flex-1 min-w-0">
-            <div className="flex flex-nowrap gap-3 overflow-x-auto pr-2">
-              {navItems.map((item) => {
-              const isActive = active === item.id;
-              return (
-                <button
-                  key={item.id}
-                  type="button"
-                  onClick={() => navigate(item.to)}
-                  className={`flex items-center gap-2 rounded-full border px-5 py-2 text-sm font-semibold uppercase tracking-wide transition-colors ${
-                    isActive
-                      ? 'border-amber-400 bg-white/10 text-white'
-                      : 'border-white/20 text-white hover:border-amber-400'
-                  }`}
-                >
-                  {item.label}
-                  {item.id === 'live' && typeof item.badge === 'number' && (
-                    <span className="flex items-center justify-center rounded-full bg-red-600 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-white">
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-             })}
-           </div>
-          </div>
-          <div>
+          <div className="flex flex-wrap justify-between items-center gap-4">
+            <div>
+              <h1 className="text-3xl font-display font-bold text-amber-400">Admin Dashboard</h1>
+              <p className="text-gray-400">Welcome, Administrator</p>
+            </div>
             <button
               type="button"
               onClick={handleLogout}
@@ -89,6 +61,30 @@ const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({ active, liveBadgeCoun
               Logout
             </button>
           </div>
+          <nav className="mt-6 flex items-center space-x-2 overflow-x-auto pb-2">
+            {navItems.map((item) => {
+              const isActive = active === item.id;
+              const baseClasses =
+                'relative px-4 py-2 text-sm font-semibold rounded-md transition-colors whitespace-nowrap flex-shrink-0';
+              const activeClasses = 'bg-amber-400 text-black shadow-md shadow-amber-400/20';
+              const inactiveClasses = 'bg-gray-800/50 text-amber-300 hover:bg-gray-700/50';
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  onClick={() => navigate(item.to)}
+                  className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
+                >
+                  {item.label}
+                  {item.id === 'live' && typeof item.badge === 'number' && (
+                    <span className="absolute -top-0 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white">
+                      {item.badge}
+                    </span>
+                  )}
+                </button>
+              );
+            })}
+          </nav>
         </div>
       </div>
     </div>

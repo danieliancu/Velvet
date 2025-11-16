@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import AdminPageHeader from '../components/AdminPageHeader';
 
 const driverDirectory = {
-  james: { name: 'James P.', phone: '+44 7700 900123', email: 'james@velvetdrivers.co.uk' },
+  james: { name: 'James P.', phone: '+447404494690', email: 'james@velvetdrivers.co.uk' },
   robert: { name: 'Robert K.', phone: '+44 7700 900234', email: 'robert@velvetdrivers.co.uk' },
   david: { name: 'David C.', phone: '+44 7700 900345', email: 'david@velvetdrivers.co.uk' },
   anna: { name: 'Anna B.', phone: '+44 7700 900456', email: 'anna@velvetdrivers.co.uk' },
   oliver: { name: 'Oliver T.', phone: '+44 7700 900567', email: 'oliver@velvetdrivers.co.uk' }
 } as const;
+
+const formatPhoneForWhatsApp = (phone: string) => phone.replace(/\D/g, '');
 
 const mockLiveBookings = [
   {
@@ -15,8 +17,11 @@ const mockLiveBookings = [
     pickup: 'Heathrow Terminal 5',
     dropOff: 'The Ritz London',
     passenger: 'Alice Wonderland',
-    phone: '+44 7700 123456',
+    phone: '+44 7404 494690',
     notes: 'Flight BA909 - Meet Door 15',
+    time: '10:00',
+    date: '16/11/2025',
+    priceDetails: '£111.00 ( £101.00 + £10.00 Pick-up fee)',
     drivers: ['james', 'robert', 'david']
   },
   {
@@ -26,12 +31,24 @@ const mockLiveBookings = [
     passenger: 'Bob Builder',
     phone: '+44 7700 654321',
     notes: 'Needs Wi-Fi & water onboard',
+    time: '12:45',
+    date: '16/11/2025',
+    priceDetails: '£89.00 ( £79.00 + £10.00 Pick-up fee)',
     drivers: ['anna', 'oliver']
   }
 ] as const;
 
 const buildBookingSummary = (booking: (typeof mockLiveBookings)[number]) => {
-  return `Booking ${booking.id} - Pickup ${booking.pickup}, Drop-off ${booking.dropOff}. Passenger ${booking.passenger}, Phone ${booking.phone}. Notes: ${booking.notes}.`;
+  return `Time: ${booking.time}
+Date: ${booking.date}
+Passenger: ${booking.passenger}
+Phone: ${booking.phone}
+Pickup: ${booking.pickup}
+Drop-off: ${booking.dropOff}
+
+Price:  ${booking.priceDetails}
+
+Notes: ${booking.notes}`;
 };
 
 const AdminDashboardPage: React.FC = () => {
@@ -71,7 +88,29 @@ const AdminDashboardPage: React.FC = () => {
     }));
   };
 
-  const handleSend = (driverKey: string) => {
+  const openWhatsAppChat = (driverKey: string, text: string) => {
+    if (!text) return;
+    const driverId = driverKey.split('-').at(-1);
+    if (!driverId) return;
+    const driver = driverDirectory[driverId as keyof typeof driverDirectory];
+    if (!driver) return;
+    const digits = formatPhoneForWhatsApp(driver.phone);
+    if (!digits) return;
+    const params = new URLSearchParams();
+    params.set('text', text);
+    const url = `whatsapp://send?phone=${digits}&${params.toString()}`;
+    if (typeof window !== 'undefined') {
+      window.location.href = url;
+    }
+  };
+
+  const handleSend = (driverKey: string, fallbackMessage?: string) => {
+    const draft = (driverMessages[driverKey] ?? '').trim();
+    const message = draft || fallbackMessage?.trim() || '';
+    if (!message) {
+      return;
+    }
+    openWhatsAppChat(driverKey, message);
     setDriverMessages((prev) => ({ ...prev, [driverKey]: '' }));
   };
 
@@ -106,10 +145,17 @@ const AdminDashboardPage: React.FC = () => {
                         <div className="flex-1 lg:basis-[40%] space-y-3">
                           <p className="text-sm font-semibold tracking-wide text-white">{booking.id}</p>
                           <p className="text-sm text-gray-300">
-                            Pickup: {booking.pickup} - Drop-off: {booking.dropOff}
+                            Pickup: {booking.pickup} · Drop-off: {booking.dropOff}
                           </p>
                           <p className="text-xs text-gray-400">
-                            Passenger: {booking.passenger} - Phone: {booking.phone}
+                            Time: {booking.time} · Date: {booking.date}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            Passenger: {booking.passenger} · Phone: {booking.phone}
+                          </p>
+                          <p className="text-xs text-gray-400">
+                            Price:{'\u00A0\u00A0'}
+                            <span className="font-semibold text-white">{booking.priceDetails}</span>
                           </p>
                           <p className="text-xs text-gray-400">Notes: {booking.notes}</p>
                             <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -214,24 +260,9 @@ const AdminDashboardPage: React.FC = () => {
                                               <div className="flex flex-wrap items-center gap-3">
                                                 <button
                                                   type="button"
-                                                  onClick={() => toggleWhatsApp(driverKey)}
-                                                  className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.4em] text-white transition-colors opacity-80 hover:opacity-100"
-                                                >
-                                                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500/80 text-[10px]">
-                                                    <svg viewBox="0 0 24 24" className="h-3 w-3 text-white">
-                                                      <path
-                                                        fill="currentColor"
-                                                        d="M12 2C6.476 2 2 6.477 2 12a10 10 0 0016.546 8.657l3.225.48-.726-3.734A9.963 9.963 0 0022 12c0-5.523-4.477-10-10-10zm0 18a8 8 0 01-6.325-12.816l.004-.005a7.977 7.977 0 0111.146 11.221A7.952 7.952 0 0112 20zm1.5-5.5h-1l-.2-.006c-.5-.05-1.35-.6-1.8-1.25-.41-.56-.79-1.35-.77-1.89 0-.67.3-.9.8-.96.58-.08 1.02.32 1.5.32.5 0 .86-.15 1.2-.35.22-.13.38-.29.4-.75.02-.2 0-.55-.01-.76-.02-.31-.25-.55-.56-.57-.27-.01-.52.16-.68.28-.38.32-.8.85-1.08 1.2-.2.26-.5.26-.8.17-.3-.09-.62-.28-.92-.44a5.548 5.548 0 00-.82-.34c-.59-.17-1.2-.06-1.64.38a2.148 2.148 0 00-.58 1.6c-.07.7.14 1.46.48 2.03.4.7.92 1.38 1.6 1.88.32.24.64.4 1.04.49.63.13 1.35-.03 1.77-.36.19-.15.36-.3.5-.36.19-.08.4-.1.64-.05.3.06.6.22.82.46.5.52.72 1.24 1.04 2.02.33.82.85 1.67 1.46 2.19H13z"
-                                                      />
-                                                    </svg>
-                                                  </span>
-                                                  WhatsApp
-                                                </button>
-                                                <button
-                                                  type="button"
                                                   onClick={() => toggleDriverConfirmation(driverKey)}
                                                   disabled={bookingLocked}
-                                                  className={`flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold transition ${
+                                                  className={`bg-gray-900 flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold transition ${
                                                     confirmedDriver
                                                       ? 'bg-green-600/30 text-green-200'
                                                       : 'text-gray-300'
@@ -246,6 +277,21 @@ const AdminDashboardPage: React.FC = () => {
                                                     {confirmedDriver ? 'Driver confirmed' : 'Driver confirmation'}
                                                   </span>
                                                 </button>
+                                                <button
+                                                  type="button"
+                                                  onClick={() => toggleWhatsApp(driverKey)}
+                                                  className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.4em] text-white transition-colors opacity-80 hover:opacity-100"
+                                                >
+                                                  <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500/80 text-[10px]">
+                                                    <svg viewBox="0 0 24 24" className="h-3 w-3 text-white">
+                                                      <path
+                                                        fill="currentColor"
+                                                        d="M12 2C6.476 2 2 6.477 2 12a10 10 0 0016.546 8.657l3.225.48-.726-3.734A9.963 9.963 0 0022 12c0-5.523-4.477-10-10-10zm0 18a8 8 0 01-6.325-12.816l.004-.005a7.977 7.977 0 0111.146 11.221A7.952 7.952 0 0112 20zm1.5-5.5h-1l-.2-.006c-.5-.05-1.35-.6-1.8-1.25-.41-.56-.79-1.35-.77-1.89 0-.67.3-.9.8-.96.58-.08 1.02.32 1.5.32.5 0 .86-.15 1.2-.35.22-.13.38-.29.4-.75.02-.2 0-.55-.01-.76-.02-.31-.25-.55-.56-.57-.27-.01-.52.16-.68.28-.38.32-.8.85-1.08 1.2-.2.26-.5.26-.8.17-.3-.09-.62-.28-.92-.44a5.548 5.548 0 00-.82-.34c-.59-.17-1.2-.06-1.64.38a2.148 2.148 0 00-.58 1.6c-.07.7.14 1.46.48 2.03.4.7.92 1.38 1.6 1.88.32.24.64.4 1.04.49.63.13 1.35-.03 1.77-.36.19-.15.36-.3.5-.36.19-.08.4-.1.64-.05.3.06.6.22.82.46.5.52.72 1.24 1.04 2.02.33.82.85 1.67 1.46 2.19H13z"
+                                                      />
+                                                    </svg>
+                                                  </span>
+                                                  WhatsApp
+                                                </button>                                                
                                               </div>
                                             </div>
                                             {isWhatsappOpen && (
@@ -275,8 +321,9 @@ const AdminDashboardPage: React.FC = () => {
                                                   </button>
                                                   <button
                                                     type="button"
-                                                    onClick={() => handleSend(driverKey)}
-                                                    className="rounded-full border border-white/20 px-3 py-1 text-xs text-white transition hover:border-amber-400"
+                                                    onClick={() => handleSend(driverKey, buildBookingSummary(booking))}
+                                                    disabled={!messageValue.trim()}
+                                                    className="rounded-full border border-white/20 px-3 py-1 text-xs text-white transition hover:border-amber-400 disabled:opacity-50 disabled:cursor-not-allowed"
                                                   >
                                                     Send
                                                   </button>
@@ -313,4 +360,3 @@ const AdminDashboardPage: React.FC = () => {
 };
 
 export default AdminDashboardPage;
-

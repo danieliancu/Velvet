@@ -8,6 +8,7 @@ export type OlderBooking = {
   passengerPhone: string;
   driverName: string;
   vehicle: string;
+  numberPlate: string;
   notes: string;
 };
 
@@ -22,6 +23,7 @@ export const olderBookingsData: OlderBooking[] = [
     passengerPhone: '+44 7700 112233',
     driverName: 'James P.',
     vehicle: 'Mercedes-Benz S-Class',
+    numberPlate: 'EK70 MJK',
     notes: 'Baby seat ready, arrival from Munich.'
   },
   {
@@ -34,6 +36,7 @@ export const olderBookingsData: OlderBooking[] = [
     passengerPhone: '+44 7700 443322',
     driverName: 'Robert K.',
     vehicle: 'BMW 7 Series',
+    numberPlate: 'LS24 VWP',
     notes: 'Corporate guest, needs Wi-Fi and water on board.'
   },
   {
@@ -46,6 +49,7 @@ export const olderBookingsData: OlderBooking[] = [
     passengerPhone: '+44 7700 556677',
     driverName: 'David C.',
     vehicle: 'Range Rover Autobiography',
+    numberPlate: 'VX57 RFD',
     notes: 'Waiting for clients from Zurich.'
   },
   {
@@ -58,6 +62,7 @@ export const olderBookingsData: OlderBooking[] = [
     passengerPhone: '+44 7700 778899',
     driverName: 'James P.',
     vehicle: 'Mercedes-Benz Maybach',
+    numberPlate: 'PE21 ACR',
     notes: 'Requires cool towels and privacy screen.'
   },
   {
@@ -70,6 +75,7 @@ export const olderBookingsData: OlderBooking[] = [
     passengerPhone: '+44 7700 990011',
     driverName: 'Robert K.',
     vehicle: 'Audi A8 L',
+    numberPlate: 'DN21 YLO',
     notes: 'Late afternoon cancellation, rebooked.'
   },
   {
@@ -82,6 +88,7 @@ export const olderBookingsData: OlderBooking[] = [
     passengerPhone: '+44 7700 223344',
     driverName: 'David C.',
     vehicle: 'Bentley Flying Spur',
+    numberPlate: 'LR75 QNE',
     notes: 'Early arrival, premium security clearance.'
   },
   {
@@ -94,6 +101,7 @@ export const olderBookingsData: OlderBooking[] = [
     passengerPhone: '+44 7700 665544',
     driverName: 'Anna B.',
     vehicle: 'Tesla Model S',
+    numberPlate: 'EV13 TES',
     notes: 'EV ride requested with quiet cabin.'
   },
   {
@@ -106,6 +114,7 @@ export const olderBookingsData: OlderBooking[] = [
     passengerPhone: '+44 7700 334455',
     driverName: 'Oliver T.',
     vehicle: 'Jaguar XJ',
+    numberPlate: 'JM52 GKF',
     notes: 'VIP with late arrival, meet at platform 9.'
   }
 ];
