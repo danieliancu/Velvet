@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import FormLayout from '../components/FormLayout';
 import Input from '../components/Input';
+import { useAlert } from '../components/AlertProvider';
 
 const steps = ['Account information', 'Your details', 'Your car', 'Bank details'];
 
@@ -21,6 +22,7 @@ const fileFields = Object.freeze({
 
 const DriverSignUpPage: React.FC = () => {
   const navigate = useNavigate();
+  const { showAlert } = useAlert();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<Record<string, string>>({});
 
@@ -42,7 +44,7 @@ const DriverSignUpPage: React.FC = () => {
       return;
     }
 
-    alert('Application submitted for review. You will be notified via email.');
+    showAlert('Application submitted for review. You will be notified via email.');
     navigate('/driver/login');
   };
 
@@ -76,20 +78,31 @@ const DriverSignUpPage: React.FC = () => {
       </div>
       <div>
         <p className="text-sm font-semibold text-amber-400">Upload documents</p>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="space-y-4">
           {fileFields.yourDetails.map((field) => (
-            <label key={field.id} className="flex flex-col text-sm text-gray-400">
-              {field.label}
-              <input
-                id={field.id}
-                type="file"
-                className="mt-2 rounded-xl border border-white/20 bg-white/5 px-3 py-2 text-xs text-white"
-                onChange={handleFieldChange(field.id)}
-              />
-              {formData[field.id] && (
-                <span className="mt-1 text-xs text-gray-500">{formData[field.id]}</span>
-              )}
-            </label>
+            <div key={field.id} className="space-y-1">
+              <p className="text-sm text-gray-300">{field.label}</p>
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor={field.id}
+                  className="flex items-center justify-between rounded-2xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-amber-400 cursor-pointer"
+                >
+                  <span>Choose file</span>
+                  <span className="text-xs text-gray-200">
+                    {formData[field.id] ? 'Ready' : 'Tap to upload'}
+                  </span>
+                </label>
+                <input
+                  id={field.id}
+                  type="file"
+                  className="sr-only"
+                  onChange={handleFieldChange(field.id)}
+                />
+                {formData[field.id] && (
+                  <span className="text-xs text-gray-400 truncate">{formData[field.id]}</span>
+                )}
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -139,20 +152,31 @@ const DriverSignUpPage: React.FC = () => {
       </div>
       <div>
         <p className="text-sm font-semibold text-amber-400">Upload documents</p>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="space-y-4">
           {fileFields.carDetails.map((field) => (
-            <label key={field.id} className="flex flex-col text-sm text-gray-400">
-              {field.label}
-              <input
-                id={field.id}
-                type="file"
-                className="mt-2 rounded-xl border border-white/20 bg-white/5 px-3 py-2 text-xs text-white"
-                onChange={handleFieldChange(field.id)}
-              />
-              {formData[field.id] && (
-                <span className="mt-1 text-xs text-gray-500">{formData[field.id]}</span>
-              )}
-            </label>
+            <div key={field.id} className="space-y-1">
+              <p className="text-sm text-gray-300">{field.label}</p>
+              <div className="flex flex-col gap-2">
+                <label
+                  htmlFor={field.id}
+                  className="flex items-center justify-between rounded-2xl border border-white/15 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition hover:border-amber-400 cursor-pointer"
+                >
+                  <span>Choose file</span>
+                  <span className="text-xs text-gray-200">
+                    {formData[field.id] ? 'Ready' : 'Tap to upload'}
+                  </span>
+                </label>
+                <input
+                  id={field.id}
+                  type="file"
+                  className="sr-only"
+                  onChange={handleFieldChange(field.id)}
+                />
+                {formData[field.id] && (
+                  <span className="text-xs text-gray-400 truncate">{formData[field.id]}</span>
+                )}
+              </div>
+            </div>
           ))}
         </div>
       </div>
@@ -295,7 +319,7 @@ const DriverSignUpPage: React.FC = () => {
             <button
               type="button"
               onClick={goBack}
-              className="px-4 py-2 text-sm font-semibold text-white uppercase border border-white/20 rounded-md hover:border-amber-400 transition"
+              className="px-8 py-3 text-lg font-semibold bg-amber-500 text-black rounded-md hover:bg-amber-400 transition-all duration-300 transform hover:scale-105 shadow-[0_0_15px_rgba(251,191,36,0.5)]"
             >
               Back
             </button>
@@ -306,7 +330,7 @@ const DriverSignUpPage: React.FC = () => {
             type="submit"
             className="px-8 py-3 text-lg font-semibold bg-amber-500 text-black rounded-md hover:bg-amber-400 transition-all duration-300 transform hover:scale-105 shadow-[0_0_15px_rgba(251,191,36,0.5)]"
           >
-            {step === steps.length ? 'Submit Application' : 'Continue'}
+            {step === steps.length ? 'Submit' : 'Continue'}
           </button>
         </div>
         {step === 1 && (

@@ -4,6 +4,7 @@ import DashboardInput from '../../components/DashboardInput';
 import DashboardSelect from '../../components/DashboardSelect';
 import { Star } from 'lucide-react';
 import type { Journey } from '../../types';
+import { useAlert } from '../../components/AlertProvider';
 
 interface ClientReviewProps {
   isGuest?: boolean;
@@ -13,10 +14,11 @@ interface ClientReviewProps {
 const ClientReview: React.FC<ClientReviewProps> = ({ isGuest = false, completedJourneys = [] }) => {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
+  const { showAlert } = useAlert();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Thank you for your ${rating}-star review!`);
+    showAlert(`Thank you for your ${rating}-star review!`);
     // Here you would typically handle form submission
   };
 

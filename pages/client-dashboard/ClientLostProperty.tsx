@@ -2,6 +2,7 @@
 import React from 'react';
 import DashboardInput from '../../components/DashboardInput';
 import DashboardSelect from '../../components/DashboardSelect';
+import { useAlert } from '../../components/AlertProvider';
 import type { Journey } from '../../types';
 
 interface ClientLostPropertyProps {
@@ -10,9 +11,10 @@ interface ClientLostPropertyProps {
 }
 
 const ClientLostProperty: React.FC<ClientLostPropertyProps> = ({ isGuest = false, completedJourneys = [] }) => {
+  const { showAlert } = useAlert();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Lost property report submitted. We will contact you shortly.');
+    showAlert('Lost property report submitted. We will contact you shortly.');
     // Here you would typically handle form submission
   };
 

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
+import { useAlert } from '../components/AlertProvider';
 import { Clock, User, DollarSign, Car } from 'lucide-react';
 import PageShell from '../components/PageShell';
 import DashboardInput from '../components/DashboardInput';
@@ -24,6 +25,7 @@ const mockStatementData = [
 
 const mockCars = [
     {
+        id: 'car-1',
         vrm: 'LC20 ABC',
         make: 'Mercedes-Benz',
         model: 'S-Class',
@@ -33,6 +35,7 @@ const mockCars = [
         logbookStatus: 'Uploaded',
     },
     {
+        id: 'car-2',
         vrm: 'BD68 XYZ',
         make: 'BMW',
         model: '7 Series',
@@ -42,6 +45,8 @@ const mockCars = [
         logbookStatus: 'Uploaded',
     }
 ];
+
+const actionButtonClass = "px-10 py-2.5 font-semibold bg-amber-500 text-black rounded-lg hover:bg-amber-400 transition-colors";
 
 const DriverJobs: React.FC = () => (
     <div>
@@ -99,58 +104,156 @@ const DriverJobs: React.FC = () => (
     </div>
 );
   
-const UploadItem: React.FC<{ label: string }> = ({ label }) => {
-    const id = label.toLowerCase().replace(/ /g, '-');
-    return (
-        <div className="flex justify-between items-center py-3 border-b border-amber-900/40">
-            <span className="text-white/90 text-sm">{label}</span>
-            <label htmlFor={id} className="cursor-pointer bg-amber-500 text-black px-5 py-1.5 rounded-lg text-xs font-bold hover:bg-amber-400 transition-colors">
-                Upload
-            </label>
-            <input type="file" id={id} className="hidden" />
-        </div>
-    );
+const StatusPill: React.FC<{ text: string }> = ({ text }) => (
+  <span className="text-[11px] font-semibold rounded-full bg-emerald-600 px-3 py-0.5 text-white">
+    {text}
+  </span>
+);
+
+const NewUploadButton: React.FC<{ htmlFor: string }> = ({ htmlFor }) => (
+  <label
+    htmlFor={htmlFor}
+    className="rounded-full border border-amber-500 bg-amber-500 px-4 py-1 text-xs font-semibold text-black uppercase transition hover:bg-amber-400 cursor-pointer"
+  >
+    New Upload
+  </label>
+);
+
+const UploadStatusItem: React.FC<{ label: string }> = ({ label }) => {
+  const id = `upload-${label.toLowerCase().replace(/[^a-z0-9]+/gi, '-')}`;
+  return (
+    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-b border-amber-900/40">
+      <span className="text-white/90 text-sm">{label}</span>
+      <div className="flex items-center gap-3">
+        <StatusPill text="Uploaded" />
+        <NewUploadButton htmlFor={id} />
+        <input id={id} type="file" className="hidden" />
+      </div>
+    </div>
+  );
 };
   
-const DriverProfile = () => {
-    return (
-        <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
-            <div className="xl:col-span-3 bg-gradient-to-br from-[#1E1212] via-[#100808] to-black border border-amber-900/50 rounded-2xl p-8">
-                <h2 className="text-2xl font-bold font-display text-amber-400 mb-6">Your Details</h2>
-                <form className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <DashboardInput id="first-name" label="First Name" type="text" />
-                    <DashboardInput id="last-name" label="Last Name" type="text" />
-                    <DashboardInput id="email" label="Email" type="email" />
-                    <DashboardInput id="phone" label="Phone" type="tel" />
-                    <div className="sm:col-span-2">
-                        <DashboardInput id="driving-license" label="Driving License" type="text" />
-                    </div>
-                    <div className="sm:col-span-2">
-                        <DashboardInput id="address" label="Address" type="text" />
-                    </div>
-                    <DashboardInput id="pco-licence-no" label="PCO Licence No" type="text" />
-                    <DashboardInput id="pco-expiry" label="PCO Expiry" type="date" />
-                     <div className="sm:col-span-2 mt-2 flex justify-start">
-                        <button type="submit" className="px-10 py-2.5 font-semibold bg-amber-500 text-black rounded-lg hover:bg-amber-400 transition-colors">
-                            Save
-                        </button>
-                    </div>
-                </form>
-            </div>
+const initialDriverDetails = {
+  firstName: 'Daniel',
+  lastName: 'Iancu',
+  email: 'daniel@velvetdrivers.co.uk',
+  phone: '+44 7700 112233',
+  drivingLicense: 'D1234567',
+  address: '25 Green Park, London',
+  pcoLicenceNo: 'PCO-908172',
+  pcoExpiry: '2026-10-15'
+};
 
-            <div className="xl:col-span-2 bg-gradient-to-br from-[#1E1212] via-[#100808] to-black border border-amber-900/50 rounded-2xl p-8">
-                 <h2 className="text-2xl font-bold font-display text-amber-400 mb-6">Upload Documents</h2>
-                 <div className="space-y-1">
-                    <UploadItem label="PCO Licence No" />
-                    <UploadItem label="Driving License front" />
-                    <UploadItem label="Driving License back side" />
-                 </div>
-                 <p className="text-xs text-amber-200/60 mt-6">
-                    We store all documents securely. Reminders are sent before expiry.
-                 </p>
-            </div>
+const DriverProfile = () => {
+  const [detailsEditable, setDetailsEditable] = useState(false);
+  const [details, setDetails] = useState(initialDriverDetails);
+
+  const handleDetailChange = (field: keyof typeof initialDriverDetails) => (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDetails((prev) => ({ ...prev, [field]: event.target.value }));
+  };
+
+  const toggleDetailsEdit = () => {
+    setDetailsEditable((prev) => !prev);
+  };
+
+  return (
+    <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
+      <div className="xl:col-span-3 bg-gradient-to-br from-[#1E1212] via-[#100808] to-black border border-amber-900/50 rounded-2xl p-8">
+        <h2 className="text-2xl font-bold font-display text-amber-400 mb-6">Your Details</h2>
+        <form className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <DashboardInput
+            id="first-name"
+            label="First Name"
+            type="text"
+            value={details.firstName}
+            readOnly={!detailsEditable}
+            onChange={handleDetailChange('firstName')}
+          />
+          <DashboardInput
+            id="last-name"
+            label="Last Name"
+            type="text"
+            value={details.lastName}
+            readOnly={!detailsEditable}
+            onChange={handleDetailChange('lastName')}
+          />
+          <DashboardInput
+            id="email"
+            label="Email"
+            type="email"
+            value={details.email}
+            readOnly={!detailsEditable}
+            onChange={handleDetailChange('email')}
+          />
+          <DashboardInput
+            id="phone"
+            label="Phone"
+            type="tel"
+            value={details.phone}
+            readOnly={!detailsEditable}
+            onChange={handleDetailChange('phone')}
+          />
+          <div className="sm:col-span-2">
+            <DashboardInput
+              id="driving-license"
+              label="Driving License"
+              type="text"
+              value={details.drivingLicense}
+              readOnly={!detailsEditable}
+              onChange={handleDetailChange('drivingLicense')}
+            />
+          </div>
+          <div className="sm:col-span-2">
+            <DashboardInput
+              id="address"
+              label="Address"
+              type="text"
+              value={details.address}
+              readOnly={!detailsEditable}
+              onChange={handleDetailChange('address')}
+            />
+          </div>
+          <DashboardInput
+            id="pco-licence-no"
+            label="PCO Licence No"
+            type="text"
+            value={details.pcoLicenceNo}
+            readOnly={!detailsEditable}
+            onChange={handleDetailChange('pcoLicenceNo')}
+          />
+          <DashboardInput
+            id="pco-expiry"
+            label="PCO Expiry"
+            type="date"
+            value={details.pcoExpiry}
+            readOnly={!detailsEditable}
+            onChange={handleDetailChange('pcoExpiry')}
+          />
+          <div className="sm:col-span-2 mt-2 flex justify-start">
+            <button
+              type="button"
+              onClick={toggleDetailsEdit}
+              className={actionButtonClass}
+            >
+              {detailsEditable ? 'Save' : 'Edit'}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div className="xl:col-span-2 bg-gradient-to-br from-[#1E1212] via-[#100808] to-black border border-amber-900/50 rounded-2xl p-8">
+        <h2 className="text-2xl font-bold font-display text-amber-400 mb-6">Upload Documents</h2>
+        <div className="space-y-1">
+          <UploadStatusItem label="PCO Licence No" />
+          <UploadStatusItem label="Driving License front" />
+          <UploadStatusItem label="Driving License back side" />
         </div>
-    );
+        <p className="text-xs text-amber-200/60 mt-6">
+          We store all documents securely. Reminders are sent before expiry.
+        </p>
+      </div>
+    </div>
+  );
 };
 
 const MonthlyStatement: React.FC = () => {
@@ -233,13 +336,6 @@ const MonthlyStatement: React.FC = () => {
     );
 };
 
-const CarDetailItem: React.FC<{ label: string, value: string }> = ({ label, value }) => (
-    <div className="flex justify-between py-1.5 text-sm">
-        <span className="text-amber-200/70 font-semibold">{label}:</span>
-        <span className="text-white/90">{value}</span>
-    </div>
-);
-
 const UploadItemWithExpiry: React.FC<{ label: string }> = ({ label }) => {
     const id = label.toLowerCase().replace(/ /g, '-');
     return (
@@ -248,6 +344,30 @@ const UploadItemWithExpiry: React.FC<{ label: string }> = ({ label }) => {
             <div className="flex items-center gap-2">
                 <span style={{ fontSize:"12px" }}>Expiring:</span> 
                 <input type="date" className="bg-gray-100/90 border border-amber-900/60 rounded-md px-2 py-1 text-xs text-black w-32" />
+                 <label htmlFor={id} className="cursor-pointer bg-amber-500 text-black px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-amber-400 transition-colors">
+                    Upload
+                </label>
+                <input type="file" id={id} className="hidden" />
+            </div>
+        </div>
+    );
+}
+
+const AddCarUploadItem: React.FC<{ label: string; showExpiry?: boolean }> = ({ label, showExpiry = true }) => {
+    const id = `add-car-${label.toLowerCase().replace(/ /g, '-')}`;
+    return (
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-3 border-b border-amber-900/40">
+            <span className="text-white/90 text-sm">{label}</span>
+            <div className="flex items-center gap-3">
+                {showExpiry && (
+                    <>
+                        <span className="text-xs text-white/80 uppercase tracking-[0.3em]">Expiring:</span>
+                        <input
+                            type="date"
+                            className="add-car-date bg-white border border-amber-900/60 rounded-md px-3 py-1 text-xs text-black w-32"
+                        />
+                    </>
+                )}
                 <label htmlFor={id} className="cursor-pointer bg-amber-500 text-black px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-amber-400 transition-colors">
                     Upload
                 </label>
@@ -261,6 +381,20 @@ const CarsPage: React.FC = () => {
     const [vrm, setVrm] = useState('');
     const [make, setMake] = useState('');
     const [model, setModel] = useState('');
+    const { showAlert } = useAlert();
+    const [cars, setCars] = useState(mockCars);
+    const [carEditing, setCarEditing] = useState<Record<string, boolean>>(() =>
+        mockCars.reduce((acc, car) => ({ ...acc, [car.id]: false }), {})
+    );
+
+    const toggleCarEdit = (carId: string) => {
+        setCarEditing(prev => ({ ...prev, [carId]: !prev[carId] }));
+    };
+
+    const handleCarChange = (carId: string, field: keyof typeof mockCars[number]) => (event: React.ChangeEvent<HTMLInputElement>) => {
+        const value = event.target.value;
+        setCars(prev => prev.map(car => (car.id === carId ? { ...car, [field]: value } : car)));
+    };
 
     const handleFindVehicle = () => {
         // TODO: Integrate with DVLA API
@@ -271,32 +405,79 @@ const CarsPage: React.FC = () => {
         } else if (vrm.toUpperCase().startsWith('BD68')) {
             setMake('BMW');
             setModel('7 Series');
-        } else {
-            alert('Vehicle not found. Please check the VRM and try again.');
-        }
+          } else {
+            showAlert('Vehicle not found. Please check the VRM and try again.');
+          }
     }
     
     return (
         <div className="grid grid-cols-1 xl:grid-cols-5 gap-8">
             <div className="xl:col-span-3 bg-gradient-to-br from-[#1E1212] via-[#100808] to-black border border-amber-900/50 rounded-2xl p-8">
                 <h2 className="text-2xl font-bold font-display text-amber-400 mb-6">My Car(s)</h2>
-                <div className="space-y-6">
-                    {mockCars.map(car => (
-                        <div key={car.vrm} className="border-b-2 border-amber-900/50 pb-6 last:border-b-0 last:pb-0">
-                             <div className="flex items-center gap-4 mb-3">
-                                <Car className="text-amber-400" size={24} />
-                                <h3 className="text-xl font-bold text-amber-400">{car.make} {car.model}</h3>
+                 <div className="space-y-6">
+                      {cars.map(car => {
+                          const editing = !!carEditing[car.id];
+                          return (
+                          <div key={car.id} className="border-b-2 border-amber-900/50 pb-6 last:border-b-0 last:pb-0">
+                                  <div className="flex items-center justify-between gap-3 mb-3">
+                                      <div className="flex items-center gap-4">
+                                          <Car className="text-amber-400" size={24} />
+                                          <h3 className="text-xl font-bold text-amber-400">{car.make} {car.model}</h3>
+                                      </div>
+                                      <button
+                                          type="button"
+                                          onClick={() => toggleCarEdit(car.id)}
+                                      className={actionButtonClass}
+                                  >
+                                      {editing ? 'Save' : 'Edit'}
+                                  </button>
+                                  </div>
+                             <div className="space-y-1 pl-10">
+                                  <DashboardInput
+                                      id={`${car.id}-vrm`}
+                                     label="Vehicle Reg (VRM)"
+                                     type="text"
+                                     value={car.vrm}
+                                     readOnly={!editing}
+                                      onChange={handleCarChange(car.id, 'vrm')}
+                                 />
+                                  <DashboardInput
+                                      id={`${car.id}-mot`}
+                                     label="MOT Expiry"
+                                     type="date"
+                                     value={car.motExpiry}
+                                     readOnly={!editing}
+                                      onChange={handleCarChange(car.id, 'motExpiry')}
+                                 />
+                                  <DashboardInput
+                                      id={`${car.id}-insurance`}
+                                     label="Insurance Expiry"
+                                     type="date"
+                                     value={car.insuranceExpiry}
+                                     readOnly={!editing}
+                                      onChange={handleCarChange(car.id, 'insuranceExpiry')}
+                                 />
+                                  <DashboardInput
+                                      id={`${car.id}-phv`}
+                                     label="PHV Car License Expiry"
+                                     type="date"
+                                     value={car.phvExpiry}
+                                     readOnly={!editing}
+                                      onChange={handleCarChange(car.id, 'phvExpiry')}
+                                 />
+                                  <div className="flex items-center justify-between py-2 gap-3">
+                                      <span className="text-white/90 text-sm">Logbook V5a</span>
+                                      <div className="flex items-center gap-3">
+                                          <span className="text-[11px] font-semibold rounded-full bg-emerald-600 px-3 py-0.5 text-white">{car.logbookStatus}</span>
+
+                                          <input id={`${car.vrm}-logbook`} type="file" className="hidden" />
+                                      </div>
+                                  </div>
                              </div>
-                            <div className="space-y-1 pl-10">
-                                <CarDetailItem label="Vehicle Reg (VRM)" value={car.vrm} />
-                                <CarDetailItem label="MOT Expiry" value={car.motExpiry} />
-                                <CarDetailItem label="Insurance Expiry" value={car.insuranceExpiry} />
-                                <CarDetailItem label="PHV Car License Expiry" value={car.phvExpiry} />
-                                <CarDetailItem label="Logbook V5" value={car.logbookStatus} />
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                         </div>
+                         );
+                     })}
+                 </div>
             </div>
 
             <div className="xl:col-span-2 bg-gradient-to-br from-[#1E1212] via-[#100808] to-black border border-amber-900/50 rounded-2xl p-8">
@@ -315,15 +496,15 @@ const CarsPage: React.FC = () => {
                     <DashboardInput id="model" label="Model" type="text" value={model} readOnly />
 
                     <div className="pt-2">
-                        <UploadItemWithExpiry label="MOT" />
-                        <UploadItemWithExpiry label="Insurance" />
-                        <UploadItemWithExpiry label="PHV Car License" />
-                        <UploadItem label="Logbook V5" />
+                        <AddCarUploadItem label="MOT" />
+                        <AddCarUploadItem label="Insurance" />
+                        <AddCarUploadItem label="PHV Car License" />
+                        <AddCarUploadItem label="Logbook V5" showExpiry={false} />
                     </div>
                     
                     <div className="pt-4 flex justify-start">
                         <button type="submit" className="px-10 py-2.5 font-semibold bg-amber-500 text-black rounded-lg hover:bg-amber-400 transition-colors">
-                            Save Car
+                            Save New Car
                         </button>
                     </div>
                  </form>
@@ -337,6 +518,7 @@ const DriverDashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('Dashboard');
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { showAlert } = useAlert();
 
   const handleLogout = () => {
     logout();

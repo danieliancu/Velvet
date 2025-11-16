@@ -7,6 +7,7 @@ import BookingSelect from '../components/BookingSelect';
 import BookingTextArea from '../components/BookingTextArea';
 import { PlusCircle, XCircle, Calendar, Clock } from 'lucide-react';
 import { useBookings } from '../App';
+import { useAlert } from '../components/AlertProvider';
 import type { Booking } from '../types';
 
 
@@ -46,6 +47,8 @@ const BookingPage: React.FC = () => {
         setDropOffs(newDropOffs);
     };
     
+    const { showAlert } = useAlert();
+
     const handleSubmitBooking = (e: React.FormEvent) => {
         e.preventDefault();
         const bookingData: Omit<Booking, 'id' | 'status'> = {
@@ -65,7 +68,7 @@ const BookingPage: React.FC = () => {
             notes
         };
         addBooking(bookingData);
-        alert('Booking submitted! An operator will call you shortly to confirm.');
+        showAlert('Booking submitted! An operator will call you shortly to confirm.');
         navigate('/');
     };
 

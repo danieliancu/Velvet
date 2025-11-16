@@ -1,11 +1,13 @@
 
 import React from 'react';
 import DashboardInput from '../../components/DashboardInput';
+import { useAlert } from '../../components/AlertProvider';
 
 const ClientUpdateDetails: React.FC = () => {
+  const { showAlert } = useAlert();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Details updated successfully.');
+    showAlert('Details updated successfully.');
     // Here you would typically handle form submission
   };
 

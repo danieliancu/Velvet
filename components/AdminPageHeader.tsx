@@ -31,6 +31,18 @@ const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({ active, liveBadgeCoun
       id: 'drivers',
       label: 'Drivers',
       to: '/admin/drivers'
+    },
+    {
+      id: 'awaiting',
+      label: 'Awaiting Approval',
+      to: '/admin/awaiting',
+      badge: 4
+    },
+    {
+      id: 'notifications',
+      label: 'Notifications',
+      to: '/admin/notifications',
+      badge: 8
     }
   ] as const;
 
@@ -76,7 +88,7 @@ const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({ active, liveBadgeCoun
                   className={`${baseClasses} ${isActive ? activeClasses : inactiveClasses}`}
                 >
                   {item.label}
-                  {item.id === 'live' && typeof item.badge === 'number' && (
+                  {typeof item.badge === 'number' && item.badge > 0 && (
                     <span className="absolute -top-0 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white">
                       {item.badge}
                     </span>

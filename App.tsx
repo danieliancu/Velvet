@@ -1,6 +1,7 @@
 
 import React, { useState, createContext, useContext } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import './global.css';
 import HomePage from './pages/HomePage';
 import ClientLoginPage from './pages/ClientLoginPage';
 import ClientSignUpPage from './pages/ClientSignUpPage';
@@ -11,6 +12,7 @@ import DriverDashboardPage from './pages/DriverDashboardPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminDriversPage from './pages/AdminDriversPage';
+import AlertProvider from './components/AlertProvider';
 import { Role } from './types';
 import type { User, Booking } from './types';
 
@@ -25,6 +27,7 @@ import DriverHubPage from './pages/DriverHubPage';
 import BookingPage from './pages/BookingPage';
 import OlderBookingsPage from './pages/OlderBookingsPage';
 import ContactPage from './pages/ContactPage';
+import AwaitingApprovalPage from './pages/AwaitingApprovalPage';
 
 // --- AUTH CONTEXT ---
 interface AuthContextType {
@@ -117,8 +120,9 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, allowedRoles 
 function App() {
   return (
     <AuthProvider>
-      <BookingProvider>
-        <HashRouter>
+      <AlertProvider>
+        <BookingProvider>
+          <HashRouter>
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/client/login" element={<ClientLoginPage />} />
@@ -154,6 +158,11 @@ function App() {
                 <AdminDashboardPage />
               </ProtectedRoute>
             } />
+            <Route path="/admin/awaiting" element={
+              <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+                <AwaitingApprovalPage />
+              </ProtectedRoute>
+            } />
             <Route path="/admin/drivers" element={
               <ProtectedRoute allowedRoles={[Role.ADMIN]}>
                 <AdminDriversPage />
@@ -164,7 +173,8 @@ function App() {
           </Routes>
         </HashRouter>
       </BookingProvider>
-    </AuthProvider>
+    </AlertProvider>
+  </AuthProvider>
   );
 }
 

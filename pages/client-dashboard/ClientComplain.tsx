@@ -2,6 +2,7 @@
 import React from 'react';
 import DashboardInput from '../../components/DashboardInput';
 import DashboardSelect from '../../components/DashboardSelect';
+import { useAlert } from '../../components/AlertProvider';
 import type { Journey } from '../../types';
 
 interface ClientComplainProps {
@@ -10,9 +11,10 @@ interface ClientComplainProps {
 }
 
 const ClientComplain: React.FC<ClientComplainProps> = ({ isGuest = false, completedJourneys = [] }) => {
+  const { showAlert } = useAlert();
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    alert('Complaint submitted. We will get back to you within 48 hours.');
+    showAlert('Complaint submitted. We will get back to you within 48 hours.');
     // Here you would typically handle form submission
   };
 
