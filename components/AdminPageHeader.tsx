@@ -18,16 +18,18 @@ const Logo = () => (
   <img src="/assets/logo.png" alt="Velvet Drivers Logo" className="w-[220px] h-auto" />
 );
 
-const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({ active, liveBadgeCount = 0 }) => {
+const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({ active, liveBadgeCount }) => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const defaultLiveBadgeCount = 2; // keep visible when no live count is passed from page
+  const computedLiveBadge = liveBadgeCount ?? defaultLiveBadgeCount;
 
   const navItems: NavItem[] = [
     {
       id: 'live',
       label: 'Live Bookings',
       to: '/admin/dashboard',
-      badge: liveBadgeCount
+      badge: computedLiveBadge
     },
     {
       id: 'older',

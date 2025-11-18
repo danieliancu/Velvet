@@ -28,6 +28,7 @@ import BookingPage from './pages/BookingPage';
 import OlderBookingsPage from './pages/OlderBookingsPage';
 import ContactPage from './pages/ContactPage';
 import AwaitingApprovalPage from './pages/AwaitingApprovalPage';
+import AdminNotificationsPage from './pages/AdminNotificationsPage';
 
 // --- AUTH CONTEXT ---
 interface AuthContextType {
@@ -166,6 +167,11 @@ function App() {
             <Route path="/admin/drivers" element={
               <ProtectedRoute allowedRoles={[Role.ADMIN]}>
                 <AdminDriversPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/notifications" element={
+              <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+                <AdminNotificationsPage />
               </ProtectedRoute>
             } />
 
