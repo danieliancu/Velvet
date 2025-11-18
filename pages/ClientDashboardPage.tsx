@@ -83,6 +83,11 @@ const ClientDashboardPage: React.FC = () => {
               </button>
             </div>
             <nav className="mt-6 flex items-center space-x-2 overflow-x-auto pb-2">
+              <button
+                onClick={() => navigate('/booking')}
+                className="px-6 py-2 text-sm font-semibold rounded-md transition-colors whitespace-nowrap bg-green-600 text-white"              >
+                Book a Journey!
+              </button>
               {tabs.map((tab) => (
                 <button
                   key={tab}
@@ -96,12 +101,6 @@ const ClientDashboardPage: React.FC = () => {
                   {tab}
                 </button>
               ))}
-              <button
-                onClick={() => navigate('/booking')}
-                className="px-6 py-2 text-sm font-semibold rounded-md transition-colors whitespace-nowrap bg-amber-500 text-black shadow-lg shadow-amber-500/30 hover:bg-amber-400 transform hover:scale-105"
-              >
-                Book a Journey
-              </button>
             </nav>
           </header>
 
