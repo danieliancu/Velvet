@@ -46,7 +46,11 @@ const mockCars = [
     }
 ];
 
-const actionButtonClass = "px-10 py-2.5 font-semibold bg-amber-500 text-black rounded-lg hover:bg-amber-400 transition-colors";
+const actionButtonClass = (isSaving: boolean) =>
+  `px-10 py-2.5 font-semibold rounded-lg transition-colors ${
+    isSaving ? 'bg-green-600 text-white hover:bg-green-500' : 'bg-amber-500 text-black hover:bg-amber-400'
+  }`;
+const uploadButtonClass = "cursor-pointer bg-amber-500 text-black px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-amber-400 transition-colors";
 
 const DriverJobs: React.FC = () => (
     <div>
@@ -233,7 +237,7 @@ const DriverProfile = () => {
             <button
               type="button"
               onClick={toggleDetailsEdit}
-              className={actionButtonClass}
+              className={actionButtonClass(detailsEditable)}
             >
               {detailsEditable ? 'Save' : 'Edit'}
             </button>
@@ -427,7 +431,7 @@ const CarsPage: React.FC = () => {
                                       <button
                                           type="button"
                                           onClick={() => toggleCarEdit(car.id)}
-                                      className={actionButtonClass}
+                                      className={actionButtonClass(editing)}
                                   >
                                       {editing ? 'Save' : 'Edit'}
                                   </button>
@@ -441,30 +445,66 @@ const CarsPage: React.FC = () => {
                                      readOnly={!editing}
                                       onChange={handleCarChange(car.id, 'vrm')}
                                  />
-                                  <DashboardInput
-                                      id={`${car.id}-mot`}
-                                     label="MOT Expiry"
-                                     type="date"
-                                     value={car.motExpiry}
-                                     readOnly={!editing}
-                                      onChange={handleCarChange(car.id, 'motExpiry')}
-                                 />
-                                  <DashboardInput
-                                      id={`${car.id}-insurance`}
-                                     label="Insurance Expiry"
-                                     type="date"
-                                     value={car.insuranceExpiry}
-                                     readOnly={!editing}
-                                      onChange={handleCarChange(car.id, 'insuranceExpiry')}
-                                 />
-                                  <DashboardInput
-                                      id={`${car.id}-phv`}
-                                     label="PHV Car License Expiry"
-                                     type="date"
-                                     value={car.phvExpiry}
-                                     readOnly={!editing}
-                                      onChange={handleCarChange(car.id, 'phvExpiry')}
-                                 />
+                                  <div className="flex items-end gap-3">
+                                      <div className="flex-1">
+                                          <DashboardInput
+                                              id={`${car.id}-mot`}
+                                             label="MOT Expiry"
+                                             type="date"
+                                             value={car.motExpiry}
+                                             readOnly={!editing}
+                                              onChange={handleCarChange(car.id, 'motExpiry')}
+                                         />
+                                      </div>
+                                      {editing && (
+                                          <div className="pb-1">
+                                              <label htmlFor={`${car.id}-mot-upload`} className={uploadButtonClass}>
+                                                  Upload
+                                              </label>
+                                              <input type="file" id={`${car.id}-mot-upload`} className="hidden" />
+                                          </div>
+                                      )}
+                                  </div>
+                                  <div className="flex items-end gap-3">
+                                      <div className="flex-1">
+                                          <DashboardInput
+                                              id={`${car.id}-insurance`}
+                                             label="Insurance Expiry"
+                                             type="date"
+                                             value={car.insuranceExpiry}
+                                             readOnly={!editing}
+                                              onChange={handleCarChange(car.id, 'insuranceExpiry')}
+                                         />
+                                      </div>
+                                      {editing && (
+                                          <div className="pb-1">
+                                              <label htmlFor={`${car.id}-insurance-upload`} className={uploadButtonClass}>
+                                                  Upload
+                                              </label>
+                                              <input type="file" id={`${car.id}-insurance-upload`} className="hidden" />
+                                          </div>
+                                      )}
+                                  </div>
+                                  <div className="flex items-end gap-3">
+                                      <div className="flex-1">
+                                          <DashboardInput
+                                              id={`${car.id}-phv`}
+                                             label="PHV Car License Expiry"
+                                             type="date"
+                                             value={car.phvExpiry}
+                                             readOnly={!editing}
+                                              onChange={handleCarChange(car.id, 'phvExpiry')}
+                                         />
+                                      </div>
+                                      {editing && (
+                                          <div className="pb-1">
+                                              <label htmlFor={`${car.id}-phv-upload`} className={uploadButtonClass}>
+                                                  Upload
+                                              </label>
+                                              <input type="file" id={`${car.id}-phv-upload`} className="hidden" />
+                                          </div>
+                                      )}
+                                  </div>
                                   <div className="flex items-center justify-between py-2 gap-3">
                                       <span className="text-white/90 text-sm">Logbook V5a</span>
                                       <div className="flex items-center gap-3">

@@ -1,13 +1,51 @@
 import React, { useState } from 'react';
 import AdminPageHeader from '../components/AdminPageHeader';
 
-const driverDirectory = {
-  james: { name: 'James P.', phone: '+447404494690', email: 'james@velvetdrivers.co.uk' },
-  robert: { name: 'Robert K.', phone: '+44 7700 900234', email: 'robert@velvetdrivers.co.uk' },
-  david: { name: 'David C.', phone: '+44 7700 900345', email: 'david@velvetdrivers.co.uk' },
-  anna: { name: 'Anna B.', phone: '+44 7700 900456', email: 'anna@velvetdrivers.co.uk' },
-  oliver: { name: 'Oliver T.', phone: '+44 7700 900567', email: 'oliver@velvetdrivers.co.uk' }
-} as const;
+type DriverDirectoryEntry = {
+  name: string;
+  phone: string;
+  plateNo: string;
+  make: string;
+  model: string;
+};
+
+const driverDirectory: Record<string, DriverDirectoryEntry> = {
+  james: {
+    name: 'James P.',
+    phone: '+447404494690',
+    plateNo: 'DL 123 ABC',
+    make: 'Mercedes-Benz',
+    model: 'S-Class'
+  },
+  robert: {
+    name: 'Robert K.',
+    phone: '+44 7700 900234',
+    plateNo: 'RX70 DVE',
+    make: 'BMW',
+    model: '7 Series'
+  },
+  david: {
+    name: 'David C.',
+    phone: '+44 7700 900345',
+    plateNo: 'DC19 PCO',
+    make: 'Audi',
+    model: 'A8'
+  },
+  anna: {
+    name: 'Anna B.',
+    phone: '+44 7700 900456',
+    plateNo: 'AB21 LUX',
+    make: 'Mercedes-Benz',
+    model: 'E-Class'
+  },
+  oliver: {
+    name: 'Oliver T.',
+    phone: '+44 7700 900567',
+    plateNo: 'OT69 VEL',
+    make: 'Lexus',
+    model: 'RX'
+  }
+};
 
 const formatPhoneForWhatsApp = (phone: string) => phone.replace(/\D/g, '');
 
@@ -255,7 +293,13 @@ const AdminDashboardPage: React.FC = () => {
                                                   Phone: {driver.phone}
                                                 </p>
                                                 <p className="text-[11px] text-gray-400">
-                                                  Email: {driver.email}
+                                                  Plate no: {driver.plateNo}
+                                                </p>
+                                                <p className="text-[11px] text-gray-400">
+                                                  Make: {driver.make}
+                                                </p>
+                                                <p className="text-[11px] text-gray-400">
+                                                  Model: {driver.model}
                                                 </p>
                                               </div>
                                               <div className="flex flex-wrap items-center gap-3">

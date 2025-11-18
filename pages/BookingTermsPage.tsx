@@ -4,26 +4,28 @@ import PolicyPageLayout, { PolicySection, PolicyList } from '../components/Polic
 
 const BookingTermsPage: React.FC = () => {
   return (
-    <PolicyPageLayout title="TfL Booking Terms">
-      <p>These terms are in compliance with Transport for London (TfL) regulations for Private Hire Vehicle (PHV) operators.</p>
-      
-      <PolicySection title="1. Booking Confirmation">
-        <p className="font-bold">A booking is only confirmed once Velvet Drivers Limited calls you to confirm after receiving your online request.</p>
-        <p>This is a mandatory step to ensure all journey details are correct and comply with regulations.</p>
+    <PolicyPageLayout title="Booking & Dispatch Policy">
+      <p>All bookings and dispatch activities are managed by Velvet Drivers Limited in line with TfL requirements.</p>
+
+      <PolicySection title="1. Bookings">
+        <PolicyList
+          items={[
+            'Bookings are accepted via phone, website, or email.',
+            'All bookings must contain passenger details, pickup time, location, destination, fare estimate, and special requirements.',
+            'All journeys must be pre-booked; drivers must not accept street hails.'
+          ]}
+        />
       </PolicySection>
 
-      <PolicySection title="2. Record Keeping">
-        <p>We record and maintain the following booking information for a minimum of 12 months, as required by TfL:</p>
-        <PolicyList items={[
-          "Passenger name and contact details.",
-          "Pickup and destination addresses.",
-          "Date and time of the booking.",
-          "Driver's name, vehicle details, and contact information.",
-          "Confirmation details."
-        ]} />
-        <p>This information is stored securely and is only shared in accordance with our Privacy Policy and legal requirements.</p>
+      <PolicySection title="2. Dispatch & Records">
+        <PolicyList
+          items={[
+            'All journeys are logged with driver allocation, dispatch time, start time, and end time.',
+            'Drivers must NOT accept bookings directly or subcontract journeys.',
+            'Booking and journey data is stored securely for 12 months for TfL inspection.'
+          ]}
+        />
       </PolicySection>
-      
     </PolicyPageLayout>
   );
 };

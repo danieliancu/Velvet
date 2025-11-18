@@ -4,41 +4,92 @@ import PolicyPageLayout, { PolicySection, PolicyList } from '../components/Polic
 
 const DriverHubPage: React.FC = () => {
   return (
-    <PolicyPageLayout title="Driver Hub">
-      <p>This section outlines the key agreements and policies for self-employed drivers working with Velvet Drivers Limited.</p>
+    <PolicyPageLayout title="Driver Terms & Conditions">
+      <p>These Terms and Conditions set out the standards, responsibilities, and expectations for all drivers engaged by Velvet Drivers Limited.</p>
 
-      <PolicySection title="Driver Agreement">
-        <p>This agreement outlines terms for self-employed drivers working with Velvet Drivers Limited.</p>
-        <h3 className="text-xl font-display font-semibold text-amber-300 mt-4">1. Status</h3>
-        <p>The Driver is a self-employed subcontractor.</p>
-        <h3 className="text-xl font-display font-semibold text-amber-300 mt-4">2. Requirements</h3>
-        <p>The Driver must hold a valid PHV licence, vehicle licence, insurance and MOT.</p>
-        <h3 className="text-xl font-display font-semibold text-amber-300 mt-4">3. Conduct</h3>
-        <p>Drivers must maintain professionalism, arrive on time, assist with luggage, and comply with TfL rules.</p>
-        <h3 className="text-xl font-display font-semibold text-amber-300 mt-4">4. Payments</h3>
-        <p>Payment structure will be agreed mutually.</p>
-        <h3 className="text-xl font-display font-semibold text-amber-300 mt-4">5. Termination</h3>
-        <p>Either party may terminate at any time with reasonable notice.</p>
+      <PolicySection title="1. Introduction">
+        <p>By driving for Velvet Drivers Limited you agree to comply with these Terms and all applicable laws and Transport for London (TfL) regulations.</p>
       </PolicySection>
-      
-      <div className="my-8 border-t border-amber-400/20"></div>
 
-      <PolicySection title="Data Processing Agreement">
-        <p>This agreement governs how drivers handle passenger personal data.</p>
-        <h3 className="text-xl font-display font-semibold text-amber-300 mt-4">1. Purpose</h3>
-        <p>Drivers receive passenger data only for completing journeys assigned by Velvet Drivers Limited.</p>
-        <h3 className="text-xl font-display font-semibold text-amber-300 mt-4">2. Data Usage Rules</h3>
-        <PolicyList items={[
-          "Data must ONLY be used for the booking.",
-          "Data must NOT be stored, copied or shared.",
-          "Data must be deleted immediately after the journey."
-        ]} />
-        <h3 className="text-xl font-display font-semibold text-amber-300 mt-4">3. Security</h3>
-        <p>Drivers must keep all information confidential.</p>
-        <h3 className="text-xl font-display font-semibold text-amber-300 mt-4">4. Breach</h3>
-        <p>Drivers must report suspected data breaches to <a href="mailto:info@velvetdrivers.co.uk" className="text-amber-400 hover:underline">info@velvetdrivers.co.uk</a> immediately.</p>
+      <PolicySection title="2. Licensing and Compliance">
+        <PolicyList
+          items={[
+            'Maintain a valid TfL private hire driver licence and provide copies on request.',
+            'Keep private hire vehicle licence, MOT, road tax, and insurance valid at all times.',
+            'Notify Velvet Drivers Limited immediately of changes to licence, insurance, criminal record, or medical condition.',
+            'Comply with all TfL regulations, road traffic legislation, and Velvet Drivers Limited policies and procedures.'
+          ]}
+        />
       </PolicySection>
-      
+
+      <PolicySection title="3. Conduct and Professionalism">
+        <PolicyList
+          items={[
+            'Act professionally, respectfully, and courteously towards passengers, staff, and third parties.',
+            'No discrimination, harassment, abuse, or inappropriate behaviour.',
+            'Be well presented with good personal hygiene and suitable clothing.',
+            'Keep vehicles clean, safe, and presentable at all times.'
+          ]}
+        />
+      </PolicySection>
+
+      <PolicySection title="4. Bookings and Work Allocation">
+        <PolicyList
+          items={[
+            'All journeys must be pre-booked and dispatched through Velvet Drivers Limited in accordance with TfL regulations.',
+            'Do not accept street hails or operate independently using Company licences or branding.',
+            'Do not arrange private bookings or accept cash/alternative payments directly outside the authorised process.',
+            'Report any booking declined or cancelled to Velvet Drivers Limited with a reason.'
+          ]}
+        />
+      </PolicySection>
+
+      <PolicySection title="5. Fares, Payments, and Charges">
+        <PolicyList
+          items={[
+            'Fares, waiting time, and additional charges are set by Velvet Drivers Limited and/or agreed at the time of booking.',
+            'Do not overcharge, request unauthorised tips, or negotiate separate fares with passengers.',
+            'Process all payments in accordance with Velvet Drivers Limited procedures.'
+          ]}
+        />
+      </PolicySection>
+
+      <PolicySection title="6. Safety and Vehicle Standards">
+        <PolicyList
+          items={[
+            'Drive safely and responsibly, obeying all speed limits and traffic laws.',
+            'Seat belts must be worn by the driver and passengers must be encouraged to wear them.',
+            'Never drive under the influence of alcohol, drugs, or impairing substances.',
+            'Report accidents, incidents, breakdowns, or safety concerns to Velvet Drivers Limited as soon as possible.'
+          ]}
+        />
+      </PolicySection>
+
+      <PolicySection title="7. Passenger Care and Confidentiality">
+        <PolicyList
+          items={[
+            'Provide reasonable assistance to passengers where safe to do so.',
+            'Keep passenger details confidential and use data only for completing the booked journey in accordance with GDPR.'
+          ]}
+        />
+      </PolicySection>
+
+      <PolicySection title="8. Complaints and Investigations">
+        <p>Cooperate fully with any investigation by Velvet Drivers Limited, TfL, the police, or any relevant authority.</p>
+      </PolicySection>
+
+      <PolicySection title="9. Termination">
+        <PolicyList
+          items={[
+            'Velvet Drivers Limited may suspend or terminate a driver’s agreement for serious or repeated breaches of these Terms, TfL rules, or the law.',
+            'Drivers may cease working by providing reasonable notice.'
+          ]}
+        />
+      </PolicySection>
+
+      <PolicySection title="10. Acceptance">
+        <p>By undertaking bookings, the driver confirms acceptance of these Terms and Conditions.</p>
+      </PolicySection>
     </PolicyPageLayout>
   );
 };

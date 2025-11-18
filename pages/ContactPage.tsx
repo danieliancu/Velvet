@@ -11,15 +11,9 @@ const contactChannels = [
   },
   {
     title: 'Operations Desk',
-    detail: '+44 20 3000 9090',
-    description: 'Speak with a bookings expert for immediate flights and airport changes.',
+    detail: '+40 2081 759 186',
+    description: 'Contact an expert from our team',
     icon: Phone
-  },
-  {
-    title: 'Corporate Office',
-    detail: '20 Grosvenor Square, London W1K 6JP',
-    description: 'Visit our office by appointment, Monday – Friday, 09:00 – 18:00.',
-    icon: MapPin
   }
 ];
 
@@ -31,11 +25,11 @@ const ContactPage: React.FC = () => {
           <p className="text-sm uppercase tracking-wider text-gray-400">Reach out</p>
           <h1 className="text-4xl font-display font-bold text-amber-400">Contact Velvet Drivers</h1>
           <p className="mt-3 text-lg text-gray-300">
-            Our concierge team is available around the clock to coordinate journeys, changes or bespoke requests.
+            Our team is available around the clock to coordinate journeys, changes or bespoke requests.
           </p>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2">
           {contactChannels.map((channel) => {
             const Icon = channel.icon;
             return (

@@ -25,10 +25,10 @@ const HomePage: React.FC = () => {
     >
       <div className="relative z-10 text-center">
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold font-display tracking-tight text-shadow-lg">
-          The Finest Drivers in Town
+          Experience the Velvet Signature Service
         </h1>
         <p className="mt-6 text-lg md:text-xl text-gray-300">
-          Experience unparalleled luxury and professionalism. Your journey, our passion.
+          Unparalleled luxury and professionalism. Your journey, our passion.
         </p>
         <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
           <button
