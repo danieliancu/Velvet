@@ -30,15 +30,17 @@ export interface Booking {
   dropOffs: string[];
   date: string;
   time: string;
-  availability: string;
   vehicle: string;
   passengers: string;
-  suitcases: string;
+  serviceType: string;
+  smallSuitcases: string;
+  largeSuitcases: string;
   waiting: string;
   miles: string;
   passengerName: string;
   passengerEmail: string;
   passengerPhone: string;
+  specialEvents: string;
   notes: string;
   status: 'Pending Confirmation' | 'Driver Assigned' | 'Completed';
 }

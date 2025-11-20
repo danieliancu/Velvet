@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
 
 type NavItem = {
-  id: 'live' | 'older' | 'drivers' | 'awaiting' | 'notifications';
+  id: 'live' | 'older' | 'drivers' | 'awaiting' | 'notifications' | 'settings';
   label: string;
   to: string;
   badge?: number;
@@ -52,6 +52,11 @@ const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({ active, liveBadgeCoun
       label: 'Notifications',
       to: '/admin/notifications',
       badge: 8
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      to: '/admin/settings'
     }
   ] as const;
 
