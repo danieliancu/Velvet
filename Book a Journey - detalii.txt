@@ -1,0 +1,81 @@
+
+Trei tick-uri:
+- As Directed (nu stii unde ajungi) drop off nu este obligatoriu
+- Wait and Return (te aduce inapoi)
+- Transfer (A->B)
+
+avaialabilty slot - maxim 10 masini, il vede doar admin. scoatem de aici
+
+
+
+
+vehicle:
+
+Luxury MPV - 7
+
+Luxury    -  4 (2 large 2 small)
+Executive -  4 (2 large 2 small)
+
+sau 
+
+1 large + 4 small
+
+
+
+
+Suitcases:
+- large
+- small
+
+
+
+
+Waiting Time (minutes)
+
+
+
+Miles - calcul automat al milelor cu google map
+
+
+Calcul:
+(As Directed):
+£40/h - Executive
+£60/h - Luxury, Luxury MPV
+
+
+(Wait and Return, Transfer (A->B)):
+Executive:
+- 1-10 mile: 6,25/mila
+- 10-40 mile: 2,5/mila
+- >40 mile: 2/mila
+
+
+Luxury:
+- 1-10 mile: 8,75/mila
+- 10-40 mile: 3,5/mila
+- >40 mile: 3/mila
+
+Luxury MVP:
+- 1-10 mile: 10/mila
+- 10-40 mile: 4/mila
+- >40 mile: 3,5/mila
+
+
+
+
+Taxa de noapte: orele 23-4: £30/comanda, toate categoriile
+
+
+
+De setat la google map, preturile vor fi si ele controlate din admin:
+Pick-up aeroport: 15
+Drop-off aeroport: 7
+
+Central London (Congestion Charge): 15 lire
+
+
+
+
+Special events: doar contact (inainte de Live fare estimate)
+
+

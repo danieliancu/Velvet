@@ -14,7 +14,7 @@ const Footer: React.FC = () => {
     return (
         <footer className="w-full py-12 px-4 text-gray-500 z-10 relative">
             <div className="max-w-7xl mx-auto border-t border-white/10 pt-10">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center md:text-left">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-left">
                     <div>
                     <h4 className="font-bold font-display text-white text-lg mb-4">Company</h4>
                         <ul className="space-y-2">
