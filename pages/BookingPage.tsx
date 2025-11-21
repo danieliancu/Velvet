@@ -126,7 +126,11 @@ const BookingPage: React.FC = () => {
                         <p className="text-sm text-gray-400 mb-6">No account needed -- log in to manage bookings later.</p>
                         <div className="flex gap-3 mb-6 text-sm flex-nowrap overflow-x-auto no-scrollbar">
                             {['Transfer', 'Wait and Return', 'As Directed'].map((option) => (
-                                <label key={option} className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-amber-900/60 bg-[#2a1a1a]/60 text-amber-100 cursor-pointer hover:border-amber-600 transition-colors">
+                                <label
+                                    key={option}
+                                    className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-amber-900/60 bg-[#2a1a1a]/60 text-amber-100 cursor-pointer hover:border-amber-600 transition-colors flex-shrink-0 whitespace-nowrap"
+                                    style={{ fontSize: 'clamp(0.75rem, 1vw, 0.95rem)' }}
+                                >
                                     <input
                                         type="radio"
                                         name="serviceType"

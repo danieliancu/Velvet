@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
 import { useAlert } from '../components/AlertProvider';
@@ -23,6 +23,11 @@ const mockStatementData = [
     { date: '2025-09-03', ref: 'VD-1002', pickup: 'HA4 0HJ', dropoff: 'LHR T3', vehicle: 'MPV', miles: 12, wait: 0, fare: 52.50 },
 ];
 
+type DocumentItem = {
+    name: string;
+    type: 'jpg' | 'png' | 'pdf' | 'docx';
+};
+
 const mockCars = [
     {
         id: 'car-1',
@@ -33,6 +38,12 @@ const mockCars = [
         insuranceExpiry: '2025-08-31',
         phvExpiry: '2025-09-20',
         logbookStatus: 'Uploaded',
+        otherDocumentsStatus: 'Uploaded',
+        otherDocuments: [
+            { name: 'inspection-sheet.jpg', type: 'jpg' },
+            { name: 'service-log.png', type: 'png' },
+            { name: 'driver-certification.pdf', type: 'pdf' }
+        ] as DocumentItem[],
     },
     {
         id: 'car-2',
@@ -43,6 +54,8 @@ const mockCars = [
         insuranceExpiry: '2025-12-01',
         phvExpiry: '2026-01-10',
         logbookStatus: 'Uploaded',
+        otherDocumentsStatus: 'Not uploaded',
+        otherDocuments: [] as DocumentItem[],
     }
 ];
 
@@ -108,11 +121,27 @@ const DriverJobs: React.FC = () => (
     </div>
 );
   
-const StatusPill: React.FC<{ text: string }> = ({ text }) => (
-  <span className="text-[11px] font-semibold rounded-full bg-emerald-600 px-3 py-0.5 text-white">
-    {text}
-  </span>
-);
+type StatusVariant = 'success' | 'warning' | 'neutral';
+const statusVariantStyles: Record<StatusVariant, string> = {
+  success: 'bg-emerald-600',
+  warning: 'bg-amber-600',
+  neutral: 'bg-gray-600'
+};
+const inferStatusVariant = (text: string): StatusVariant => {
+  const normalized = text.toLowerCase();
+  if (normalized.includes('not')) return 'warning';
+  if (normalized.includes('upload')) return 'success';
+  return 'neutral';
+};
+
+const StatusPill: React.FC<{ text: string; variant?: StatusVariant }> = ({ text, variant }) => {
+  const appliedVariant = variant || inferStatusVariant(text);
+  return (
+    <span className={`text-[11px] font-semibold rounded-full px-3 py-0.5 text-white ${statusVariantStyles[appliedVariant]}`}>
+      {text}
+    </span>
+  );
+};
 
 const NewUploadButton: React.FC<{ htmlFor: string }> = ({ htmlFor }) => (
   <label
@@ -385,6 +414,8 @@ const CarsPage: React.FC = () => {
     const [vrm, setVrm] = useState('');
     const [make, setMake] = useState('');
     const [model, setModel] = useState('');
+    const [isFindingVehicle, setIsFindingVehicle] = useState(false);
+    const authTokenRef = useRef<string | null>(null);
     const { showAlert } = useAlert();
     const [cars, setCars] = useState(mockCars);
     const [carEditing, setCarEditing] = useState<Record<string, boolean>>(() =>
@@ -400,18 +431,86 @@ const CarsPage: React.FC = () => {
         setCars(prev => prev.map(car => (car.id === carId ? { ...car, [field]: value } : car)));
     };
 
-    const handleFindVehicle = () => {
-        // TODO: Integrate with DVLA API
-        // For now, we'll mock the response
-        if (vrm.toUpperCase().startsWith('LC20')) {
-            setMake('Mercedes-Benz');
-            setModel('S-Class');
-        } else if (vrm.toUpperCase().startsWith('BD68')) {
-            setMake('BMW');
-            setModel('7 Series');
-          } else {
-            showAlert('Vehicle not found. Please check the VRM and try again.');
-          }
+    const handleRemoveOtherDocument = (carId: string, docName: string) => {
+        setCars(prev =>
+            prev.map(car =>
+                car.id === carId
+                    ? { ...car, otherDocuments: (car.otherDocuments ?? []).filter(doc => doc.name !== docName) }
+                    : car
+            )
+        );
+    };
+
+    const authenticateWithDvla = async () => {
+        const username = "import.meta.env.VITE_DVLA_USERNAME";
+        const password = "import.meta.env.VITE_DVLA_PASSWORD";
+        if (!username || !password) return null; // optional, VES also works with api key only
+
+        try {
+            const res = await fetch('https://driver-vehicle-licensing.api.gov.uk/thirdparty-access/v1/authenticate', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Accept: 'application/json'
+                },
+                body: JSON.stringify({ userName: username, password })
+            });
+            if (!res.ok) {
+                console.warn('DVLA auth failed', res.status);
+                return null;
+            }
+            const data = await res.json();
+            return data['id-token'] as string | undefined;
+        } catch (err) {
+            console.error('DVLA auth error', err);
+            return null;
+        }
+    };
+
+    const handleFindVehicle = async () => {
+        const registrationNumber = vrm.trim().toUpperCase();
+        if (!registrationNumber) {
+            showAlert('Please enter a VRM before searching.');
+            return;
+        }
+
+        setIsFindingVehicle(true);
+        try {
+            const apiKey = "";
+            if (!apiKey) {
+                showAlert('DVLA API key missing. Add VITE_DVLA_API_KEY to your environment.');
+                return;
+            }
+
+            if (!authTokenRef.current) {
+                authTokenRef.current = await authenticateWithDvla();
+            }
+
+            const response = await fetch('https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'x-api-key': apiKey,
+                    ...(authTokenRef.current ? { Authorization: `Bearer ${authTokenRef.current}` } : {})
+                },
+                body: JSON.stringify({ registrationNumber })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                showAlert(`DVLA lookup failed (${response.status}). ${errorText || 'Check the VRM and try again.'}`);
+                return;
+            }
+
+            const data = await response.json();
+            setMake(data.make || '');
+            setModel(data.model || '');
+        } catch (err) {
+            console.error('DVLA lookup error', err);
+            showAlert('Could not reach DVLA. Please try again.');
+        } finally {
+            setIsFindingVehicle(false);
+        }
     }
     
     return (
@@ -505,13 +604,57 @@ const CarsPage: React.FC = () => {
                                           </div>
                                       )}
                                   </div>
-                                  <div className="flex items-center justify-between py-2 gap-3">
+                                  <div className="flex items-center justify-between py-2 gap-3 border-b border-amber-900/40">
                                       <span className="text-white/90 text-sm">Logbook V5a</span>
                                       <div className="flex items-center gap-3">
-                                          <span className="text-[11px] font-semibold rounded-full bg-emerald-600 px-3 py-0.5 text-white">{car.logbookStatus}</span>
+                                          <StatusPill text={car.logbookStatus} variant="success" />
 
                                           <input id={`${car.vrm}-logbook`} type="file" className="hidden" />
                                       </div>
+                                  </div>
+                                  <div className="flex flex-col gap-2 py-2 border-b border-amber-900/40">
+                                      <div className="flex items-center justify-between gap-3">
+                                          <span className="text-white/90 text-sm">Other documents</span>
+                                          <div className="flex items-center gap-3">
+                                              <StatusPill
+                                                  text={editing ? 'Upload' : car.otherDocumentsStatus}
+                                                  variant={editing ? 'warning' : undefined}
+                                              />
+                                              {editing && (
+                                                  <label htmlFor={`${car.vrm}-other-docs-upload`} className={uploadButtonClass}>
+                                                      Upload
+                                                  </label>
+                                              )}
+                                              <input id={`${car.vrm}-other-docs-upload`} type="file" className="hidden" />
+                                          </div>
+                                      </div>
+                                      {car.otherDocuments?.length ? (
+                                          <div className="flex flex-wrap gap-2 text-xs text-white/80">
+                                              {car.otherDocuments.map((doc) => (
+                                                  <span
+                                                      key={`${car.id}-${doc.name}`}
+                                                      className="flex items-center gap-2 rounded-full border border-amber-900/60 bg-white/5 px-3 py-1 max-w-[200px] text-amber-100"
+                                                  >
+                                                      <span className="font-mono text-[11px] uppercase tracking-[0.2em] text-amber-200">
+                                                          .{doc.type}
+                                                      </span>
+                                                      <span className="truncate">{doc.name}</span>
+                                                      {editing && (
+                                                          <button
+                                                              type="button"
+                                                              onClick={() => handleRemoveOtherDocument(car.id, doc.name)}
+                                                              className="text-red-400 hover:text-red-300"
+                                                              aria-label={`Remove ${doc.name}`}
+                                                          >
+                                                              ×
+                                                          </button>
+                                                      )}
+                                                  </span>
+                                              ))}
+                                          </div>
+                                      ) : (
+                                          <p className="text-xs text-gray-400">No documents uploaded yet.</p>
+                                      )}
                                   </div>
                              </div>
                          </div>
@@ -527,7 +670,14 @@ const CarsPage: React.FC = () => {
                         <label htmlFor="vrm" className="block text-xs font-semibold text-amber-200/70 uppercase tracking-wider mb-2">Vehicle Reg (VRM)</label>
                         <div className="flex gap-2">
                             <input id="vrm" type="text" value={vrm} onChange={(e) => setVrm(e.target.value)} className="flex-grow w-full bg-black/40 border border-amber-900/60 rounded-lg px-3 py-2 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-amber-500 focus:border-amber-500" />
-                            <button type="button" onClick={handleFindVehicle} className="px-4 py-2 font-semibold bg-amber-600 text-black rounded-lg hover:bg-amber-500 transition-colors text-sm">Find</button>
+                            <button
+                                type="button"
+                                onClick={handleFindVehicle}
+                                disabled={isFindingVehicle}
+                                className="px-4 py-2 font-semibold bg-amber-600 text-black rounded-lg hover:bg-amber-500 transition-colors text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
+                                {isFindingVehicle ? 'Finding...' : 'Find'}
+                            </button>
                         </div>
                         <p className="text-xs text-amber-200/60 mt-1">Link to DVLA API to find Make and Model.</p>
                     </div>
@@ -540,6 +690,7 @@ const CarsPage: React.FC = () => {
                         <AddCarUploadItem label="Insurance" />
                         <AddCarUploadItem label="PHV Car License" />
                         <AddCarUploadItem label="Logbook V5" showExpiry={false} />
+                        <AddCarUploadItem label="Other documents" showExpiry={false} />
                     </div>
                     
                     <div className="pt-4 flex justify-start">
