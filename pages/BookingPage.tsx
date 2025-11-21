@@ -127,6 +127,7 @@ const BookingPage: React.FC = () => {
         const maps = (window as any).google?.maps;
         if (!maps || !distanceServiceRef.current) return;
         const waypoints = [pickup.trim(), ...dropOffs.map((d) => d.trim())].filter(Boolean);
+        const coordChain = [pickupLatLng, ...stopCoords];
         if (waypoints.length < 2) {
             setMiles('');
             return;
@@ -152,12 +153,12 @@ const BookingPage: React.FC = () => {
         (async () => {
             let totalMeters = 0;
             for (let i = 0; i < waypoints.length - 1; i += 1) {
-                const origin = i === 0 && pickupLatLng ? pickupLatLng : stopCoords[i] ?? waypoints[i];
-                const destination = stopCoords[i + 1] ?? waypoints[i + 1];
+                const originCandidate = coordChain[i];
+                const destCandidate = coordChain[i + 1];
+                const origin = originCandidate ?? waypoints[i];
+                const destination = destCandidate ?? waypoints[i + 1];
                 const meters = await getLegDistance(origin, destination);
-                if (meters == null) {
-                    continue;
-                }
+                if (meters == null) continue;
                 totalMeters += meters;
             }
             if (!isCancelled && totalMeters > 0) {
@@ -171,7 +172,7 @@ const BookingPage: React.FC = () => {
         return () => {
             isCancelled = true;
         };
-    }, [pickup, dropOffs, pickupLatLng, dropOffLatLng]);
+    }, [pickup, dropOffs, pickupLatLng, dropOffLatLng, stopCoords]);
 
     useEffect(() => {
         if (vehicle === 'Luxury' && !luxuryAllowed) {
@@ -191,11 +192,65 @@ const BookingPage: React.FC = () => {
         return hours >= 23 || hours < 4;
     };
 
-    const baseFare = 47;
-    const nightSurcharge = isNightTime() ? 30 : 0;
+    const milesValue = Number(miles) || 0;
+    const isAirport = (value: string) => /airport/i.test(value);
+
+    const getMileageRate = (veh: string, dist: number) => {
+        if (veh === 'Executive') {
+            if (dist <= 10) return 6.25;
+            if (dist <= 40) return 2.5;
+            return 2;
+        }
+        if (veh === 'Luxury') {
+            if (dist <= 10) return 8.75;
+            if (dist <= 40) return 3.5;
+            return 3;
+        }
+        // Luxury MPV and fallback
+        if (dist <= 10) return 10;
+        if (dist <= 40) return 4;
+        return 3.5;
+    };
+
+    const extras: string[] = [];
+    let totalFare = 0;
     const waitingRatePerHour = vehicle === 'Executive' ? 40 : 60;
-    const waitingCost = waitingMinutes * (waitingRatePerHour / 60);
-    const totalFare = Math.round((baseFare + nightSurcharge + waitingCost) * 100) / 100;
+    const waitingCost = serviceType === 'As Directed' ? 0 : waitingMinutes * (waitingRatePerHour / 60);
+
+    if (serviceType === 'As Directed') {
+        const hourly = vehicle === 'Executive' ? 40 : 60;
+        totalFare = hourly; // display will show /h
+    } else {
+        const rate = getMileageRate(vehicle, milesValue);
+        totalFare += milesValue * rate;
+        if (waitingCost > 0) extras.push(`Waiting time £${waitingCost.toFixed(2)}`);
+        totalFare += waitingCost;
+    }
+
+    if (isNightTime()) {
+        totalFare += 30;
+        extras.push('Night surcharge £30');
+    }
+    if (isAirport(pickup)) {
+        totalFare += 15;
+        extras.push('Airport pickup £15');
+    }
+    if (dropOffs.some(addr => isAirport(addr))) {
+        totalFare += 7;
+        extras.push('Airport drop-off £7');
+    }
+    totalFare = Math.round(totalFare * 100) / 100;
+
+    const fareDisplay = serviceType === 'As Directed'
+        ? `£${totalFare.toFixed(2)}`
+        : `£${totalFare.toFixed(2)}`;
+
+    const extrasText =
+        extras.length
+            ? `Extras applied: ${extras.join('; ')}`
+            : serviceType === 'As Directed'
+                ? 'Includes hourly rate. No extras applied.'
+                : 'Includes mileage (tiered by vehicle). No extras applied.';
 
     const handleAddStop = () => {
         setDropOffs([...dropOffs, '']);
@@ -327,7 +382,14 @@ const BookingPage: React.FC = () => {
                             <BookingInput label="Passengers" id="passengers" type="number" min="1" max="7" value={passengers} onChange={e => setPassengers(e.target.value)} />
                             <BookingInput label="Small Suitcases" id="small-suitcases" type="number" min="0" value={smallSuitcases} onChange={e => setSmallSuitcases(e.target.value)} />
                             <BookingInput label="Large Suitcases" id="large-suitcases" type="number" min="0" value={largeSuitcases} onChange={e => setLargeSuitcases(e.target.value)} />
-                            <BookingInput label="Waiting Time (minutes)" id="waiting" type="number" value={waiting} onChange={e => setWaiting(e.target.value)} />
+                            <BookingInput
+                                label="Waiting Time (minutes)"
+                                id="waiting"
+                                type="number"
+                                value={waiting}
+                                onChange={e => setWaiting(e.target.value)}
+                                disabled={serviceType === 'As Directed'}
+                            />
                             <div className="flex flex-col gap-1 w-full">
                                 <BookingInput
                                     label="Miles (auto)"
@@ -366,12 +428,8 @@ const BookingPage: React.FC = () => {
                     {/* Fare Estimate Section */}
                     <div className="bg-[#2a1a1a]/50 border border-amber-900/40 rounded-lg p-4">
                         <p className="text-sm text-amber-200/80">Live fare estimate</p>
-                        <p className="text-4xl font-bold text-amber-400 my-1">&#163;{totalFare}</p>
-                        {nightSurcharge > 0 ? (
-                            <p className="text-xs text-amber-300">Includes &#163;{nightSurcharge} night surcharge.</p>
-                        ) : (
-                            <p className="text-xs text-gray-400">Includes base fare, mileage, additional passengers, luggage, and waiting time.</p>
-                        )}
+                        <p className="text-4xl font-bold text-amber-400 my-1">{fareDisplay}</p>
+                        <p className="text-xs text-gray-400">{extrasText}</p>
                     </div>
                     {/* Passenger Details Section */}
                     <div>
