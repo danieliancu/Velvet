@@ -193,7 +193,7 @@ const BookingPage: React.FC = () => {
     };
 
     const milesValue = Number(miles) || 0;
-    const isAirport = (value: string) => /airport/i.test(value);
+    const isAirportOrTerminal = (value: string) => /(airport|terminal)/i.test(value);
 
     const getMileageRate = (veh: string, dist: number) => {
         if (veh === 'Executive') {
@@ -231,13 +231,13 @@ const BookingPage: React.FC = () => {
         totalFare += 30;
         extras.push('Night surcharge £30');
     }
-    if (isAirport(pickup)) {
+    if (isAirportOrTerminal(pickup)) {
         totalFare += 15;
-        extras.push('Airport pickup £15');
+        extras.push('Airport/terminal pickup £15');
     }
-    if (dropOffs.some(addr => isAirport(addr))) {
+    if (dropOffs.some(addr => isAirportOrTerminal(addr))) {
         totalFare += 7;
-        extras.push('Airport drop-off £7');
+        extras.push('Airport/terminal drop-off £7');
     }
     totalFare = Math.round(totalFare * 100) / 100;
 
@@ -407,6 +407,15 @@ const BookingPage: React.FC = () => {
                         </div>
                     </div>
 
+
+                    {/* Fare Estimate Section */}
+                    <div className="bg-[#2a1a1a]/50 border border-amber-900/40 rounded-lg p-4">
+                        <p className="text-sm text-amber-200/80">Live fare estimate</p>
+                        <p className="text-4xl font-bold text-amber-400 my-1">{fareDisplay}</p>
+                        <p className="text-xs text-gray-400">{extrasText}</p>
+                    </div>
+
+
                     {/* Special Events Section */}
                     <div className="bg-[#2a1a1a]/50 border border-amber-900/40 rounded-lg p-4 space-y-3">
                         <BookingTextArea
@@ -428,12 +437,8 @@ const BookingPage: React.FC = () => {
                     </div>
 
 
-                    {/* Fare Estimate Section */}
-                    <div className="bg-[#2a1a1a]/50 border border-amber-900/40 rounded-lg p-4">
-                        <p className="text-sm text-amber-200/80">Live fare estimate</p>
-                        <p className="text-4xl font-bold text-amber-400 my-1">{fareDisplay}</p>
-                        <p className="text-xs text-gray-400">{extrasText}</p>
-                    </div>
+
+
                     {/* Passenger Details Section */}
                     <div>
                          <h2 className="text-3xl font-bold font-display text-amber-400 mb-6">Passenger Details</h2>
@@ -474,5 +479,4 @@ const BookingPage: React.FC = () => {
 };
 
 export default BookingPage;
-
 
