@@ -216,10 +216,10 @@ const BookingPage: React.FC = () => {
     let totalFare = 0;
     const waitingRatePerHour = vehicle === 'Executive' ? 40 : 60;
     const waitingCost = serviceType === 'As Directed' ? 0 : waitingMinutes * (waitingRatePerHour / 60);
+    const hourlyRate = vehicle === 'Executive' ? 40 : 60;
 
     if (serviceType === 'As Directed') {
-        const hourly = vehicle === 'Executive' ? 40 : 60;
-        totalFare = hourly; // display will show /h
+        totalFare = hourlyRate; // base hourly; extras applied below
     } else {
         const rate = getMileageRate(vehicle, milesValue);
         totalFare += milesValue * rate;
@@ -241,8 +241,11 @@ const BookingPage: React.FC = () => {
     }
     totalFare = Math.round(totalFare * 100) / 100;
 
+    const extrasAmount = serviceType === 'As Directed' ? totalFare - hourlyRate : 0;
     const fareDisplay = serviceType === 'As Directed'
-        ? `£${totalFare.toFixed(2)}`
+        ? extrasAmount > 0
+            ? `£${hourlyRate.toFixed(2)}/h + £${extrasAmount.toFixed(2)}`
+            : `£${hourlyRate.toFixed(2)}/h`
         : `£${totalFare.toFixed(2)}`;
 
     const extrasText =
