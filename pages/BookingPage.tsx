@@ -1,5 +1,5 @@
 ﻿
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageShell from '../components/PageShell';
 import BookingInput from '../components/BookingInput';
@@ -25,7 +25,15 @@ const BookingPage: React.FC = () => {
     const [smallSuitcases, setSmallSuitcases] = useState('0');
     const [largeSuitcases, setLargeSuitcases] = useState('0');
     const [waiting, setWaiting] = useState('0');
-    const [miles, setMiles] = useState('10');
+    const [miles, setMiles] = useState('');
+    const [pickupLatLng, setPickupLatLng] = useState<{ lat: number; lng: number } | null>(null);
+    const [dropOffLatLng, setDropOffLatLng] = useState<{ lat: number; lng: number } | null>(null);
+    const [stopCoords, setStopCoords] = useState<Array<{ lat: number; lng: number } | null>>([null]);
+    const googleLoadPromise = useRef<Promise<void> | null>(null);
+    const pickupInputRef = useRef<HTMLInputElement | null>(null);
+    const dropoffInputRefs = useRef<Array<HTMLInputElement | null>>([]);
+    const dropoffAutocompleteRefs = useRef<any[]>([]);
+    const distanceServiceRef = useRef<any>(null);
     const [passengerName, setPassengerName] = useState('');
     const [passengerEmail, setPassengerEmail] = useState('');
     const [passengerPhone, setPassengerPhone] = useState('');
@@ -47,6 +55,123 @@ const BookingPage: React.FC = () => {
     const luxuryAllowed = passengersCount <= 4 && withinLuxuryExecLuggage();
     const executiveAllowed = passengersCount <= 4 && withinLuxuryExecLuggage();
     const luxuryMpvAllowed = passengersCount <= 7;
+
+    const loadGoogleMaps = () => {
+        if ((window as any).google?.maps?.places) {
+            return Promise.resolve();
+        }
+        if (googleLoadPromise.current) {
+            return googleLoadPromise.current;
+        }
+        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+        if (!apiKey) {
+            console.warn('Missing VITE_GOOGLE_MAPS_API_KEY');
+            return Promise.resolve();
+        }
+        googleLoadPromise.current = new Promise<void>((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+            script.async = true;
+            script.onload = () => resolve();
+            script.onerror = (err) => reject(err);
+            document.head.appendChild(script);
+        });
+        return googleLoadPromise.current;
+    };
+
+    const attachAutocomplete = () => {
+        const maps = (window as any).google?.maps;
+        if (!maps?.places || !pickupInputRef.current) return;
+        distanceServiceRef.current = new maps.DistanceMatrixService();
+        const opts = { fields: ['formatted_address', 'geometry'], types: ['geocode'], componentRestrictions: { country: ['gb'] } } as any;
+
+        const pickupAuto = new maps.places.Autocomplete(pickupInputRef.current, opts);
+        pickupAuto.addListener('place_changed', () => {
+            const place = pickupAuto.getPlace();
+            if (place?.formatted_address) setPickup(place.formatted_address);
+            if (place?.geometry?.location) {
+                setPickupLatLng({ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() });
+            }
+        });
+
+        dropoffAutocompleteRefs.current.forEach((auto) => maps.event.clearInstanceListeners(auto));
+        dropoffAutocompleteRefs.current = [];
+
+        dropoffInputRefs.current.forEach((input, index) => {
+            if (!input) return;
+            const dropAuto = new maps.places.Autocomplete(input, opts);
+            dropAuto.addListener('place_changed', () => {
+                const place = dropAuto.getPlace();
+                if (place?.formatted_address) handleDropOffChange(index, place.formatted_address);
+                if (place?.geometry?.location) {
+                    const coords = [...stopCoords];
+                    coords[index] = { lat: place.geometry.location.lat(), lng: place.geometry.location.lng() };
+                    setStopCoords(coords);
+                    if (index === 0) {
+                        setDropOffLatLng({ lat: place.geometry.location.lat(), lng: place.geometry.location.lng() });
+                    }
+                }
+            });
+            dropoffAutocompleteRefs.current.push(dropAuto);
+        });
+    };
+
+    useEffect(() => {
+        loadGoogleMaps()
+            .then(() => attachAutocomplete())
+            .catch((err) => console.error('Failed to load Google Maps', err));
+        // Re-attach when count changes so new stops get autocomplete
+    }, [dropOffs.length]);
+
+    useEffect(() => {
+        const maps = (window as any).google?.maps;
+        if (!maps || !distanceServiceRef.current) return;
+        const waypoints = [pickup.trim(), ...dropOffs.map((d) => d.trim())].filter(Boolean);
+        if (waypoints.length < 2) {
+            setMiles('');
+            return;
+        }
+
+        const getLegDistance = (origin: any, destination: any) =>
+            new Promise<number | null>((resolve) => {
+                distanceServiceRef.current.getDistanceMatrix(
+                    {
+                        origins: [origin],
+                        destinations: [destination],
+                        travelMode: maps.TravelMode.DRIVING,
+                    },
+                    (response: any, status: string) => {
+                        if (status !== 'OK') return resolve(null);
+                        const meters = response?.rows?.[0]?.elements?.[0]?.distance?.value;
+                        resolve(typeof meters === 'number' ? meters : null);
+                    }
+                );
+            });
+
+        let isCancelled = false;
+        (async () => {
+            let totalMeters = 0;
+            for (let i = 0; i < waypoints.length - 1; i += 1) {
+                const origin = i === 0 && pickupLatLng ? pickupLatLng : stopCoords[i] ?? waypoints[i];
+                const destination = stopCoords[i + 1] ?? waypoints[i + 1];
+                const meters = await getLegDistance(origin, destination);
+                if (meters == null) {
+                    continue;
+                }
+                totalMeters += meters;
+            }
+            if (!isCancelled && totalMeters > 0) {
+                const milesValue = (totalMeters / 1609.34).toFixed(1);
+                setMiles(milesValue);
+            } else if (!isCancelled) {
+                setMiles('');
+            }
+        })();
+
+        return () => {
+            isCancelled = true;
+        };
+    }, [pickup, dropOffs, pickupLatLng, dropOffLatLng]);
 
     useEffect(() => {
         if (vehicle === 'Luxury' && !luxuryAllowed) {
@@ -74,12 +199,15 @@ const BookingPage: React.FC = () => {
 
     const handleAddStop = () => {
         setDropOffs([...dropOffs, '']);
+        setStopCoords([...stopCoords, null]);
     };
 
     const handleRemoveStop = (index: number) => {
         if (dropOffs.length > 1) {
             const newDropOffs = dropOffs.filter((_, i) => i !== index);
+            const newCoords = stopCoords.filter((_, i) => i !== index);
             setDropOffs(newDropOffs);
+            setStopCoords(newCoords);
         }
     };
 
@@ -87,6 +215,10 @@ const BookingPage: React.FC = () => {
         const newDropOffs = [...dropOffs];
         newDropOffs[index] = value;
         setDropOffs(newDropOffs);
+        const newCoords = [...stopCoords];
+        newCoords[index] = null;
+        setStopCoords(newCoords);
+        if (index === 0) setDropOffLatLng(null);
     };
     
     const { showAlert } = useAlert();
@@ -146,7 +278,18 @@ const BookingPage: React.FC = () => {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
                             <div className="flex flex-col gap-1 w-full">
-                                <BookingInput label="Pickup" id="pickup" placeholder="Address or postcode" value={pickup} onChange={e => setPickup(e.target.value)} required />
+                                <BookingInput
+                                    ref={pickupInputRef}
+                                    label="Pickup"
+                                    id="pickup"
+                                    placeholder="Address or postcode"
+                                    value={pickup}
+                                    onChange={e => {
+                                        setPickup(e.target.value);
+                                        setPickupLatLng(null);
+                                    }}
+                                    required
+                                />
                             </div>
                             <div className="flex flex-col gap-1 w-full space-y-3">
                                 {dropOffs.map((stop, index) => (
@@ -155,6 +298,7 @@ const BookingPage: React.FC = () => {
                                             <BookingInput 
                                                 label={index === 0 ? "Drop-off" : `Stop ${index + 1}`}
                                                 id={`dropoff-${index}`} 
+                                                ref={(el) => { dropoffInputRefs.current[index] = el; }}
                                                 value={stop}
                                                 onChange={(e) => handleDropOffChange(index, e.target.value)}
                                                 placeholder="Address or postcode"
@@ -184,7 +328,17 @@ const BookingPage: React.FC = () => {
                             <BookingInput label="Small Suitcases" id="small-suitcases" type="number" min="0" value={smallSuitcases} onChange={e => setSmallSuitcases(e.target.value)} />
                             <BookingInput label="Large Suitcases" id="large-suitcases" type="number" min="0" value={largeSuitcases} onChange={e => setLargeSuitcases(e.target.value)} />
                             <BookingInput label="Waiting Time (minutes)" id="waiting" type="number" value={waiting} onChange={e => setWaiting(e.target.value)} />
-                            <BookingInput label="Miles" id="miles" type="number" value={miles} onChange={e => setMiles(e.target.value)} readOnly />
+                            <div className="flex flex-col gap-1 w-full">
+                                <BookingInput
+                                    label="Miles (auto)"
+                                    id="miles"
+                                    type="number"
+                                    value={miles}
+                                    placeholder="Auto when pickup & drop-off selected"
+                                    readOnly
+                                />
+                                <p className="text-[11px] text-gray-400">Auto-calculated after you choose Pickup and all Drop-off stops.</p>
+                            </div>
                         </div>
                     </div>
 
