@@ -8,6 +8,22 @@ export default defineConfig(({ mode }) => {
       server: {
         port: 3000,
         host: '0.0.0.0',
+        proxy: {
+          '/api/dvla': {
+            target: 'https://driver-vehicle-licensing.api.gov.uk',
+            changeOrigin: true,
+            secure: true,
+            rewrite: (p) => p.replace(/^\/api\/dvla/, ''),
+            configure: (proxy) => {
+              proxy.on('proxyReq', (proxyReq) => {
+                if (env.VITE_DVLA_API_KEY) {
+                  proxyReq.setHeader('x-api-key', env.VITE_DVLA_API_KEY);
+                  proxyReq.setHeader('Content-Type', 'application/json');
+                }
+              });
+            },
+          },
+        },
       },
       plugins: [react()],
       define: {

@@ -1,7 +1,19 @@
 
 import React from 'react';
 
-const DashboardInput: React.FC<{ label: string, id: string, type?: string, value?: string, readOnly?: boolean, required?: boolean, autoComplete?: string }> = ({ label, id, ...props }) => (
+type DashboardInputProps = {
+    label: string;
+    id: string;
+    type?: string;
+    value?: string;
+    readOnly?: boolean;
+    required?: boolean;
+    autoComplete?: string;
+    onChange?: React.ChangeEventHandler<HTMLInputElement>;
+    placeholder?: string;
+};
+
+const DashboardInput: React.FC<DashboardInputProps> = ({ label, id, ...props }) => (
     <div>
       <label htmlFor={id} className="block text-xs font-semibold text-amber-200/70 uppercase tracking-wider mb-2">
         {label}

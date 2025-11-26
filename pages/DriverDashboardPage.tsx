@@ -442,8 +442,8 @@ const CarsPage: React.FC = () => {
     };
 
     const authenticateWithDvla = async () => {
-        const username = "import.meta.env.VITE_DVLA_USERNAME";
-        const password = "import.meta.env.VITE_DVLA_PASSWORD";
+        const username = import.meta.env.VITE_DVLA_USERNAME;
+        const password = import.meta.env.VITE_DVLA_PASSWORD;
         if (!username || !password) return null; // optional, VES also works with api key only
 
         try {
@@ -476,7 +476,7 @@ const CarsPage: React.FC = () => {
 
         setIsFindingVehicle(true);
         try {
-            const apiKey = "";
+            const apiKey = import.meta.env.VITE_DVLA_API_KEY || 'CHOAXmkCon26O2FuJrYxd2eySH9U9Rz44790QpWf';
             if (!apiKey) {
                 showAlert('DVLA API key missing. Add VITE_DVLA_API_KEY to your environment.');
                 return;
@@ -486,10 +486,11 @@ const CarsPage: React.FC = () => {
                 authTokenRef.current = await authenticateWithDvla();
             }
 
-            const response = await fetch('https://driver-vehicle-licensing.api.gov.uk/vehicle-enquiry/v1/vehicles', {
+            const response = await fetch('/api/dvla/vehicle-enquiry/v1/vehicles', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    // Proxy injects the API key; keep header for fallback/non-proxied environments.
                     'x-api-key': apiKey,
                     ...(authTokenRef.current ? { Authorization: `Bearer ${authTokenRef.current}` } : {})
                 },
@@ -497,14 +498,30 @@ const CarsPage: React.FC = () => {
             });
 
             if (!response.ok) {
-                const errorText = await response.text();
-                showAlert(`DVLA lookup failed (${response.status}). ${errorText || 'Check the VRM and try again.'}`);
+                const errorBody = await response.json().catch(() => null);
+                if (response.status === 404) {
+                    setMake('');
+                    setModel('');
+                    showAlert('DVLA: vehicle not found for that VRM. Please double-check the registration and try again.');
+                    return;
+                }
+                if (response.status === 429) {
+                    showAlert('DVLA rate limit reached. Please wait a moment and try again.');
+                    return;
+                }
+                const fallbackError = typeof errorBody === 'string' ? errorBody : errorBody?.errors?.[0]?.detail || 'Check the VRM and try again.';
+                showAlert(`DVLA lookup failed (${response.status}). ${fallbackError}`);
                 return;
             }
 
             const data = await response.json();
             setMake(data.make || '');
             setModel(data.model || '');
+            if (!data.model) {
+                showAlert('Please enter the model manually.');
+            } else {
+                showAlert('Vehicle found via DVLA. Fields updated.');
+            }
         } catch (err) {
             console.error('DVLA lookup error', err);
             showAlert('Could not reach DVLA. Please try again.');
@@ -679,11 +696,18 @@ const CarsPage: React.FC = () => {
                                 {isFindingVehicle ? 'Finding...' : 'Find'}
                             </button>
                         </div>
-                        <p className="text-xs text-amber-200/60 mt-1">Link to DVLA API to find Make and Model.</p>
+                        <p className="text-xs text-amber-200/60 mt-1">Uses DVLA Vehicle Enquiry Service; model may need manual entry.</p>
                     </div>
                     
                     <DashboardInput id="make" label="Make" type="text" value={make} readOnly />
-                    <DashboardInput id="model" label="Model" type="text" value={model} readOnly />
+                    <DashboardInput
+                        id="model"
+                        label="Model"
+                        type="text"
+                        value={model}
+                        placeholder="Enter model"
+                        onChange={(e) => setModel(e.target.value)}
+                    />
 
                     <div className="pt-2">
                         <AddCarUploadItem label="MOT" />
