@@ -1,14 +1,13 @@
-
 import React from 'react';
 import PolicyPageLayout from '../components/PolicyPageLayout';
 import DataProtectionContent from '../components/DataProtectionContent';
 
-const PrivacyPolicyPage: React.FC = () => {
+const DataProtectionPolicyPage: React.FC = () => {
   return (
-    <PolicyPageLayout title="Privacy Policy (GDPR)">
+    <PolicyPageLayout title="Data Protection & GDPR Policy">
       <DataProtectionContent />
     </PolicyPageLayout>
   );
 };
 
-export default PrivacyPolicyPage;
+export default DataProtectionPolicyPage;

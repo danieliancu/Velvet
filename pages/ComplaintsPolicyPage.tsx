@@ -1,34 +1,41 @@
-
 import React from 'react';
-import PolicyPageLayout, { PolicySection } from '../components/PolicyPageLayout';
+import PolicyPageLayout, { PolicySection, PolicyList } from '../components/PolicyPageLayout';
 
 const ComplaintsPolicyPage: React.FC = () => {
   return (
     <PolicyPageLayout title="Complaints Handling Procedure">
-      <p>We investigate every complaint fairly and promptly to meet TfL requirements and maintain service quality.</p>
+      <p>Complaints must be emailed to <a href="mailto:info@velvetdrivers.co.uk" className="text-amber-400 hover:underline">info@velvetdrivers.co.uk</a> including booking reference, time, driver details, and the issue.</p>
 
-      <PolicySection title="1. How to Submit a Complaint">
-        <p>
-          Email <a href="mailto:info@velvetdrivers.co.uk" className="text-amber-400 hover:underline">info@velvetdrivers.co.uk</a> with your booking reference, journey time, driver details, and a clear description of the issue.
-        </p>
+      <PolicySection title="Acknowledgement">
+        <p>Complaints are acknowledged within 48 hours.</p>
       </PolicySection>
 
-      <PolicySection title="2. Acknowledgement & Investigation">
-        <p>Complaints are acknowledged within 48 hours and investigated by reviewing booking logs, driver notes, and evidence.</p>
+      <PolicySection title="Investigation">
+        <p>Complaints are investigated using booking logs, evidence, and internal notes.</p>
       </PolicySection>
 
-      <PolicySection title="3. Response Time">
-        <p>A full response is provided within 7–10 working days.</p>
+      <PolicySection title="Response Time">
+        <p>A full response is provided within 7-10 business days.</p>
       </PolicySection>
 
-      <PolicySection title="4. Outcomes">
-        <p>Outcomes may include refunds, driver retraining, warnings, suspension, or reporting to TfL.</p>
+      <PolicySection title="Outcomes">
+        <PolicyList
+          items={[
+            'Refund',
+            'Retraining',
+            'Warnings',
+            'Suspension',
+            'Reporting to TfL',
+          ]}
+        />
       </PolicySection>
 
-      <PolicySection title="5. Escalation">
-        <p>
-          If you wish to escalate, contact TfL at <a href="mailto:tph.complaints@tfl.gov.uk" className="text-amber-400 hover:underline">tph.complaints@tfl.gov.uk</a>. Complaints are stored for 12 months.
-        </p>
+      <PolicySection title="Escalation">
+        <p>Escalation: <a href="mailto:tph.complaints@tfl.gov.uk" className="text-amber-400 hover:underline">tph.complaints@tfl.gov.uk</a></p>
+      </PolicySection>
+
+      <PolicySection title="Retention">
+        <p>Complaints are stored for 12 months.</p>
       </PolicySection>
     </PolicyPageLayout>
   );

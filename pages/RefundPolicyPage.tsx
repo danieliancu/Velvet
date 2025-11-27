@@ -1,25 +1,29 @@
 
 import React from 'react';
-import PolicyPageLayout, { PolicySection } from '../components/PolicyPageLayout';
+import PolicyPageLayout, { PolicySection, PolicyList } from '../components/PolicyPageLayout';
 
 const RefundPolicyPage: React.FC = () => {
   return (
-    <PolicyPageLayout title="Refund & Cancellation Policy">
-      
-      <PolicySection title="1. Cancellation">
-        <p>We offer free cancellation for all bookings up to 1 hour before the scheduled pickup time.</p>
-        <p>Late cancellations (within 1 hour of pickup) or no-shows may incur charges, which could be up to the full fare of the journey.</p>
-      </PolicySection>
-      
-      <PolicySection title="2. Refunds">
-        <p>Refunds for prepaid journeys that are cancelled in accordance with our policy are issued within 5-7 business days.</p>
-        <p>The refund will be processed back to the original method of payment.</p>
+    <PolicyPageLayout title="Cancellation & Refund Policy">
+      <PolicySection title="Cancellation">
+        <PolicyList
+          items={[
+            'Cancellations more than 2 hours before pickup: no charge.',
+            'Cancellations less than 2 hours before pickup: up to 100% charge.',
+            'Airport journeys require 3 hours notice.',
+            'If a driver is en-route or has arrived: full fare applies.',
+            'No-show equals full fare (15 minutes for standard pickup / 60 minutes for airport).',
+          ]}
+        />
       </PolicySection>
 
-      <PolicySection title="3. Disputes">
-        <p>If you have any questions or wish to dispute a charge, please contact our support team at <a href="mailto:info@velvetdrivers.co.uk" className="text-amber-400 hover:underline">info@velvetdrivers.co.uk</a>.</p>
+      <PolicySection title="Refunds">
+        <p>Refunds are issued within 3-5 business days.</p>
       </PolicySection>
-      
+
+      <PolicySection title="Disputes">
+        <p>Disputes should be submitted to <a href="mailto:info@velvetdrivers.co.uk" className="text-amber-400 hover:underline">info@velvetdrivers.co.uk</a>.</p>
+      </PolicySection>
     </PolicyPageLayout>
   );
 };

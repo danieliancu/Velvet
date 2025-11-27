@@ -17,12 +17,27 @@ import { Role } from './types';
 import type { User, Booking } from './types';
 
 import PrivacyPolicyPage from './pages/PrivacyPolicyPage';
+import DataProtectionPolicyPage from './pages/DataProtectionPolicyPage';
+import RecordKeepingPolicyPage from './pages/RecordKeepingPolicyPage';
 import TermsOfServicePage from './pages/TermsOfServicePage';
 import CookiePolicyPage from './pages/CookiePolicyPage';
 import BookingTermsPage from './pages/BookingTermsPage';
 import ComplaintsPolicyPage from './pages/ComplaintsPolicyPage';
 import RefundPolicyPage from './pages/RefundPolicyPage';
+import LostPropertyPolicyPage from './pages/LostPropertyPolicyPage';
 import SafetyPolicyPage from './pages/SafetyPolicyPage';
+import EqualityAccessibilityPolicyPage from './pages/EqualityAccessibilityPolicyPage';
+import IncidentAccidentPolicyPage from './pages/IncidentAccidentPolicyPage';
+import DriverPolicyPage from './pages/DriverPolicyPage';
+import VehiclePolicyPage from './pages/VehiclePolicyPage';
+import NoUnbookedJourneysPolicyPage from './pages/NoUnbookedJourneysPolicyPage';
+import CorporateTermsPage from './pages/CorporateTermsPage';
+import CorporatePaymentPolicyPage from './pages/CorporatePaymentPolicyPage';
+import SafetyAccessibilityPage from './pages/SafetyAccessibilityPage';
+import OperatorPoliciesPage from './pages/OperatorPoliciesPage';
+import PassengerPoliciesPage from './pages/PassengerPoliciesPage';
+import PrivacyDataPage from './pages/PrivacyDataPage';
+import CorporatePoliciesPage from './pages/CorporatePoliciesPage';
 import DriverHubPage from './pages/DriverHubPage';
 import BookingPage from './pages/BookingPage';
 import OlderBookingsPage from './pages/OlderBookingsPage';
@@ -134,13 +149,28 @@ function App() {
             <Route path="/booking" element={<BookingPage />} />
             <Route path="/admin" element={<AdminLoginPage />} />
             
+            <Route path="/legal/safety-accessibility" element={<SafetyAccessibilityPage />} />
+            <Route path="/legal/operator-policies" element={<OperatorPoliciesPage />} />
+            <Route path="/legal/passenger-policies" element={<PassengerPoliciesPage />} />
+            <Route path="/legal/privacy-data" element={<PrivacyDataPage />} />
+            <Route path="/legal/corporate" element={<CorporatePoliciesPage />} />
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+            <Route path="/data-protection-policy" element={<DataProtectionPolicyPage />} />
+            <Route path="/record-keeping-policy" element={<RecordKeepingPolicyPage />} />
             <Route path="/terms-of-service" element={<TermsOfServicePage />} />
             <Route path="/cookie-policy" element={<CookiePolicyPage />} />
             <Route path="/booking-terms" element={<BookingTermsPage />} />
             <Route path="/complaints-policy" element={<ComplaintsPolicyPage />} />
             <Route path="/refund-policy" element={<RefundPolicyPage />} />
+            <Route path="/lost-property-policy" element={<LostPropertyPolicyPage />} />
             <Route path="/safety-policy" element={<SafetyPolicyPage />} />
+            <Route path="/equality-accessibility-policy" element={<EqualityAccessibilityPolicyPage />} />
+            <Route path="/incident-accident-policy" element={<IncidentAccidentPolicyPage />} />
+            <Route path="/driver-policy" element={<DriverPolicyPage />} />
+            <Route path="/vehicle-policy" element={<VehiclePolicyPage />} />
+            <Route path="/no-unbooked-journeys" element={<NoUnbookedJourneysPolicyPage />} />
+            <Route path="/corporate-terms" element={<CorporateTermsPage />} />
+            <Route path="/corporate-payment-policy" element={<CorporatePaymentPolicyPage />} />
             <Route path="/driver-hub" element={<DriverHubPage />} />
             <Route path="/older-bookings" element={<OlderBookingsPage />} />
             <Route path="/contact" element={<ContactPage />} />
