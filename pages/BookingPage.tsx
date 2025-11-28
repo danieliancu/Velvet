@@ -124,13 +124,87 @@ const BookingPage: React.FC = () => {
     };
 
     const attachPlaceAutocomplete = async () => {
-        // Temporarily force legacy Autocomplete to restore functionality
-        attachLegacyAutocomplete();
+        const maps = (window as any).google?.maps;
+        const places = maps?.places;
+        // Use PlaceAutocompleteElement only if available and supports inputElement; otherwise fallback to legacy.
+        const PlaceAutocompleteElement = places?.PlaceAutocompleteElement;
+        if (!PlaceAutocompleteElement) {
+            attachLegacyAutocomplete();
+            return;
+        }
+
+        const tryAttach = (input: HTMLInputElement | null, onSelect: (place: PlaceResult | null) => void) => {
+            if (!input) return false;
+            let element: any;
+            try {
+                element = new PlaceAutocompleteElement();
+                (element as any).inputElement = input;
+            } catch {
+                return false;
+            }
+
+            const handler = () => {
+                const place = (element as any).getPlace ? (element as any).getPlace() : null;
+                onSelect(place);
+            };
+            ['placechange', 'gmp-placeselect', 'gmpx-placechange', 'place_changed'].forEach((evt) =>
+                element.addEventListener(evt, handler)
+            );
+            placeAutocompleteCleanupRef.current.push(() => {
+                ['placechange', 'gmp-placeselect', 'gmpx-placechange', 'place_changed'].forEach((evt) =>
+                    element.removeEventListener(evt, handler)
+                );
+            });
+            return true;
+        };
+
+        const pickupOk = tryAttach(pickupInputRef.current, (place) => {
+            if (place?.formatted_address) setPickup(place.formatted_address);
+            const loc = place?.location ?? place?.geometry?.location;
+            if (loc) {
+                const lat = typeof loc.lat === 'function' ? loc.lat() : loc.lat;
+                const lng = typeof loc.lng === 'function' ? loc.lng() : loc.lng;
+                setPickupLatLng({ lat, lng });
+            }
+        });
+
+        let allDropsOk = true;
+        dropoffInputRefs.current.forEach((input, index) => {
+            const ok = tryAttach(input, (place) => {
+                if (place?.formatted_address) handleDropOffChange(index, place.formatted_address);
+                const loc = place?.location ?? place?.geometry?.location;
+                if (loc) {
+                    const lat = typeof loc.lat === 'function' ? loc.lat() : loc.lat;
+                    const lng = typeof loc.lng === 'function' ? loc.lng() : loc.lng;
+                    const coords = [...stopCoords];
+                    coords[index] = { lat, lng };
+                    setStopCoords(coords);
+                    if (index === 0) setDropOffLatLng({ lat, lng });
+                }
+            });
+            if (!ok) allDropsOk = false;
+        });
+
+        if (!pickupOk || !allDropsOk) {
+            placeAutocompleteCleanupRef.current.forEach((fn) => fn());
+            placeAutocompleteCleanupRef.current = [];
+            attachLegacyAutocomplete();
+        }
     };
 
     useEffect(() => {
         loadGoogleMaps()
-            .then(() => attachPlaceAutocomplete())
+            .then(() => {
+                const retryAttach = (attempt = 0) => {
+                    const mapsReady = (window as any).google?.maps?.places;
+                    if (!mapsReady && attempt < 5) {
+                        setTimeout(() => retryAttach(attempt + 1), 250);
+                        return;
+                    }
+                    attachPlaceAutocomplete();
+                };
+                retryAttach();
+            })
             .catch((err) => console.error('Failed to load Google Maps', err));
         // Re-attach when count changes so new stops get autocomplete
 
