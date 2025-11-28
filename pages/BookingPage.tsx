@@ -10,6 +10,11 @@ import { useBookings } from '../App';
 import { useAlert } from '../components/AlertProvider';
 import type { Booking } from '../types';
 
+type PlaceResult = {
+    formatted_address?: string;
+    geometry?: { location?: { lat: () => number; lng: () => number } };
+    location?: { lat: number; lng: number };
+};
 
 const BookingPage: React.FC = () => {
     const navigate = useNavigate();
@@ -34,6 +39,7 @@ const BookingPage: React.FC = () => {
     const dropoffInputRefs = useRef<Array<HTMLInputElement | null>>([]);
     const dropoffAutocompleteRefs = useRef<any[]>([]);
     const distanceServiceRef = useRef<any>(null);
+    const placeAutocompleteCleanupRef = useRef<Array<() => void>>([]);
     const [passengerName, setPassengerName] = useState('');
     const [passengerEmail, setPassengerEmail] = useState('');
     const [passengerPhone, setPassengerPhone] = useState('');
@@ -70,8 +76,9 @@ const BookingPage: React.FC = () => {
         }
         googleLoadPromise.current = new Promise<void>((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places&loading=async`;
             script.async = true;
+            script.defer = true;
             script.onload = () => resolve();
             script.onerror = (err) => reject(err);
             document.head.appendChild(script);
@@ -79,7 +86,7 @@ const BookingPage: React.FC = () => {
         return googleLoadPromise.current;
     };
 
-    const attachAutocomplete = () => {
+    const attachLegacyAutocomplete = () => {
         const maps = (window as any).google?.maps;
         if (!maps?.places || !pickupInputRef.current) return;
         distanceServiceRef.current = new maps.DistanceMatrixService();
@@ -116,11 +123,117 @@ const BookingPage: React.FC = () => {
         });
     };
 
+    const attachPlaceAutocomplete = async () => {
+        const maps = (window as any).google?.maps;
+        if (!maps) return;
+
+        // Clear previous listeners
+        placeAutocompleteCleanupRef.current.forEach((fn) => fn());
+        placeAutocompleteCleanupRef.current = [];
+
+        let placesLib: any;
+        try {
+            placesLib = (await maps.importLibrary?.('places')) ?? maps.places;
+        } catch (err) {
+            console.warn('Falling back to legacy autocomplete (importLibrary failed)', err);
+            attachLegacyAutocomplete();
+            return;
+        }
+
+        const PlaceAutocompleteElement = placesLib?.PlaceAutocompleteElement ?? maps.places?.PlaceAutocompleteElement;
+        if (!PlaceAutocompleteElement) {
+            attachLegacyAutocomplete();
+            return;
+        }
+
+        distanceServiceRef.current = new maps.DistanceMatrixService();
+        // Some API versions throw for unsupported props; keep config minimal and bail to legacy on failure.
+
+        const wireElement = (input: HTMLInputElement, onSelect: (place: PlaceResult | null) => void) => {
+            let element: any;
+            try {
+                element = new PlaceAutocompleteElement();
+            } catch (err) {
+                return null;
+            }
+
+            try {
+                (element as any).inputElement = input;
+            } catch (err) {
+                return null;
+            }
+
+            const handler = () => {
+                const place = (element as any).getPlace ? (element as any).getPlace() : null;
+                onSelect(place);
+            };
+
+            const events = ['placechange', 'gmp-placeselect', 'gmpx-placechange', 'place_changed'];
+            events.forEach((evt) => element.addEventListener(evt, handler));
+
+            return () => {
+                events.forEach((evt) => element.removeEventListener(evt, handler));
+            };
+        };
+
+        let needsFallback = false;
+
+        if (pickupInputRef.current) {
+            const cleanup = wireElement(pickupInputRef.current, (place) => {
+                if (place?.formatted_address) setPickup(place.formatted_address);
+                const loc = place?.location ?? place?.geometry?.location;
+                if (loc) {
+                    const lat = typeof loc.lat === 'function' ? loc.lat() : loc.lat;
+                    const lng = typeof loc.lng === 'function' ? loc.lng() : loc.lng;
+                    setPickupLatLng({ lat, lng });
+                }
+            });
+            if (cleanup) {
+                placeAutocompleteCleanupRef.current.push(cleanup);
+            } else {
+                needsFallback = true;
+            }
+        }
+
+        dropoffInputRefs.current.forEach((input, index) => {
+            if (!input) return;
+            const cleanup = wireElement(input, (place) => {
+                if (place?.formatted_address) handleDropOffChange(index, place.formatted_address);
+                const loc = place?.location ?? place?.geometry?.location;
+                if (loc) {
+                    const lat = typeof loc.lat === 'function' ? loc.lat() : loc.lat;
+                    const lng = typeof loc.lng === 'function' ? loc.lng() : loc.lng;
+                    const coords = [...stopCoords];
+                    coords[index] = { lat, lng };
+                    setStopCoords(coords);
+                    if (index === 0) {
+                        setDropOffLatLng({ lat, lng });
+                    }
+                }
+            });
+            if (cleanup) {
+                placeAutocompleteCleanupRef.current.push(cleanup);
+            } else {
+                needsFallback = true;
+            }
+        });
+
+        if (needsFallback) {
+            placeAutocompleteCleanupRef.current.forEach((fn) => fn());
+            placeAutocompleteCleanupRef.current = [];
+            attachLegacyAutocomplete();
+        }
+    };
+
     useEffect(() => {
         loadGoogleMaps()
-            .then(() => attachAutocomplete())
+            .then(() => attachPlaceAutocomplete())
             .catch((err) => console.error('Failed to load Google Maps', err));
         // Re-attach when count changes so new stops get autocomplete
+
+        return () => {
+            placeAutocompleteCleanupRef.current.forEach((fn) => fn());
+        };
     }, [dropOffs.length]);
 
     useEffect(() => {
@@ -479,4 +592,3 @@ const BookingPage: React.FC = () => {
 };
 
 export default BookingPage;
-
