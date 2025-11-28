@@ -488,7 +488,8 @@ const CarsPage: React.FC = () => {
                 authTokenRef.current = await authenticateWithDvla();
             }
 
-            const response = await fetch('/api/dvla/vehicle-enquiry/v1/vehicles', {
+            const dvlaBaseUrl = import.meta.env.VITE_DVLA_PROXY_URL || '/api/dvla';
+            const response = await fetch(`${dvlaBaseUrl}/vehicle-enquiry/v1/vehicles`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
