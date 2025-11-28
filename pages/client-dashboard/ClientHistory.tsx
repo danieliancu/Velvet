@@ -26,10 +26,17 @@ type FilterStatus = 'All' | 'Completed' | 'Upcoming';
 
 const ClientHistory: React.FC = () => {
     const [filter, setFilter] = useState<FilterStatus>('All');
+    const [query, setQuery] = useState('');
 
     const filteredJourneys = mockJourneys.filter(journey => {
-        if (filter === 'All') return true;
-        return journey.status === filter;
+        const matchesStatus = filter === 'All' ? true : journey.status === filter;
+        const search = query.trim().toLowerCase();
+        const matchesQuery = !search
+          ? true
+          : `${journey.pickup} ${journey.destination} ${journey.driver} ${journey.car}`
+              .toLowerCase()
+              .includes(search);
+        return matchesStatus && matchesQuery;
     });
 
     const FilterButton: React.FC<{ status: FilterStatus }> = ({ status }) => (
@@ -50,10 +57,24 @@ const ClientHistory: React.FC = () => {
             <div className="flex flex-wrap justify-between items-center gap-4 mb-4">
                 <h2 className="text-2xl font-semibold font-display text-amber-300">Journey History</h2>
                 <div className="flex items-center gap-2">
-                    <FilterButton status="All" />
-                    <FilterButton status="Completed" />
                     <FilterButton status="Upcoming" />
+                    <FilterButton status="Completed" />
+                    <FilterButton status="All" />
                 </div>
+            </div>
+            <div className="relative mb-6">
+                <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 104.5 4.5a7.5 7.5 0 0012.15 12.15z" />
+                  </svg>
+                </span>
+                <input
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search by Pickup, Destination, Driver, Car"
+                  className="w-full rounded-2xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-gray-500 focus:border-amber-400 focus:outline-none"
+                />
             </div>
             <div className="bg-gray-900/50 border border-gray-800 rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
@@ -68,6 +89,7 @@ const ClientHistory: React.FC = () => {
                         <th className="p-4">Plate</th>
                         <th className="p-4">Status</th>
                         <th className="p-4 text-right">Price</th>
+                        <th className="p-4">Invoice</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -89,10 +111,24 @@ const ClientHistory: React.FC = () => {
                             <td className="p-4 align-top">{journey.plate}</td>
                             <td className="p-4 align-top"><StatusBadge status={journey.status} /></td>
                             <td className="p-4 align-top text-right font-semibold">£{journey.price.toFixed(2)}</td>
+                            <td className="p-4 align-top">
+                                <button
+                                  type="button"
+                                  className="px-2 py-1 text-xs font-semibold rounded-full bg-amber-500/15 text-amber-200 border border-amber-400/40 hover:bg-amber-500/25 transition-colors"
+                                >
+                                  Download
+                                </button>
+                                <button
+                                  type="button"
+                                  className="ml-2 px-3 py-1 text-xs font-semibold rounded-full bg-green-500/20 text-green-200 border border-green-400/40 hover:bg-green-500/30 transition-colors"
+                                >
+                                  Book again
+                                </button>
+                            </td>
                         </tr>
                         )) : (
                             <tr>
-                                <td colSpan={8} className="text-center p-8 text-gray-400">
+                                <td colSpan={9} className="text-center p-8 text-gray-400">
                                     No {filter !== 'All' ? filter.toLowerCase() : ''} journeys found.
                                 </td>
                             </tr>

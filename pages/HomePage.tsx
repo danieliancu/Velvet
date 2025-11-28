@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import PageShell from '../components/PageShell';
-import { Car, Briefcase, ShieldCheck, Star } from 'lucide-react';
+import { Car, FileText, Star, Sparkles } from 'lucide-react';
 
 const FeatureCard: React.FC<{ icon: React.ReactNode; title: string; children: React.ReactNode }> = ({ icon, title, children }) => (
   <div className="bg-black/20 border border-white/10 rounded-xl p-6 backdrop-blur-sm transform hover:scale-105 hover:border-amber-400/50 transition-all duration-300 ease-in-out">
@@ -43,22 +43,28 @@ const HomePage: React.FC = () => {
           >
             Driver
           </button>
+          <button
+            onClick={() => navigate('/corporate/login')}
+            className="w-full sm:w-48 px-8 py-3 text-lg font-semibold bg-white/10 border-2 border-white/50 text-white rounded-md hover:bg-white hover:text-black transition-all duration-300 transform hover:scale-105"
+          >
+            Corporate
+          </button>
         </div>
       </div>
 
       <div className="relative z-10 w-full max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <FeatureCard icon={<Car size={28} />} title="Luxury Fleet">
-            Travel in style with our premium selection of high-end vehicles, ensuring comfort and elegance for every trip.
+            Travel in style with our premium selection of high-end vehicles, ensuring comfort and elegance.
           </FeatureCard>
-          <FeatureCard icon={<Briefcase size={28} />} title="Professional Drivers">
-            Our chauffeurs are highly trained, vetted, and committed to providing a discreet and professional service.
+          <FeatureCard icon={<FileText size={28} />} title="Our Blog">
+            Latest stories on luxury travel, company news, and insider tips. <a href="#/blog" className="text-amber-400 underline underline-offset-4">See more</a>
           </FeatureCard>
-          <FeatureCard icon={<ShieldCheck size={28} />} title="Safety & Reliability">
-            Your safety is our priority. We guarantee timely arrivals and a secure journey from start to finish.
+          <FeatureCard icon={<Star size={28} />} title="Client Reviews">
+            Hear directly from our passengers about their Velvet journeys. <a href="#/reviews" className="text-amber-400 underline underline-offset-4">See more</a>
           </FeatureCard>
-          <FeatureCard icon={<Star size={28} />} title="Bespoke Service">
-            Tailored experiences to meet your specific needs, whether for business, leisure, or special occasions.
+          <FeatureCard icon={<Sparkles size={28} />} title="Bespoke Service">
+            Tailored experiences to meet your specific needs, whether for business or special occasions.
           </FeatureCard>
         </div>
       </div>

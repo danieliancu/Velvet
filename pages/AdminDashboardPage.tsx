@@ -120,7 +120,7 @@ const buildBookingSummary = (booking: LiveBooking) => {
   const pickupLine = formatLocationWithLink('Pickup', booking.pickup);
   const dropOffLine = formatLocationWithLink('Drop-off', booking.dropOff);
 
-  return `Time: ${booking.time}\nDate: ${booking.date}\nPassenger: ${booking.passenger}\nPhone: ${booking.phone}\n\n${pickupLine}\n${dropOffLine}\n\nPrice:  ${booking.priceDetails}\n\nNotes: ${booking.notes}`;
+  return `Time: ${booking.time}\nDate: ${booking.date}\nPassenger: ${booking.passenger}\nPhone: ${booking.phone}\n\n${pickupLine}\n\nTO\n\n${dropOffLine}\n\nPrice:  ${booking.priceDetails}\n\nNotes: ${booking.notes}`;
 };
 const AdminDashboardPage: React.FC = () => {
   const [clientConfirmed, setClientConfirmed] = useState<Record<string, boolean>>({});
@@ -128,6 +128,8 @@ const AdminDashboardPage: React.FC = () => {
   const [whatsappOpen, setWhatsappOpen] = useState<Record<string, boolean>>({});
   const [driverMessages, setDriverMessages] = useState<Record<string, string>>({});
   const [driversExpanded, setDriversExpanded] = useState<Record<string, boolean>>({});
+  const [pendingDriverConfirmKey, setPendingDriverConfirmKey] = useState<string | null>(null);
+  const [historyToggle, setHistoryToggle] = useState<Record<string, boolean>>({});
 
   const hasDriverConfirmation = (booking: LiveBooking) =>
     booking.drivers.some((driverId) => {
@@ -155,12 +157,34 @@ const AdminDashboardPage: React.FC = () => {
     setDriverConfirmed((prev) => ({ ...prev, [driverKey]: !prev[driverKey] }));
   };
 
+  const confirmDriverToggle = (driverKey: string, isAlreadyConfirmed: boolean) => {
+    if (isAlreadyConfirmed) {
+      toggleDriverConfirmation(driverKey);
+      return;
+    }
+    setPendingDriverConfirmKey(driverKey);
+  };
+
+  const handleConfirmDriver = () => {
+    if (!pendingDriverConfirmKey) return;
+    toggleDriverConfirmation(pendingDriverConfirmKey);
+    setPendingDriverConfirmKey(null);
+  };
+
+  const handleCancelDriver = () => {
+    setPendingDriverConfirmKey(null);
+  };
+
   const toggleWhatsApp = (driverKey: string) => {
     setWhatsappOpen((prev) => ({ ...prev, [driverKey]: !prev[driverKey] }));
   };
 
   const toggleDriversSection = (bookingId: string) => {
     setDriversExpanded((prev) => ({ ...prev, [bookingId]: !prev[bookingId] }));
+  };
+
+  const toggleHistoryStatus = (bookingId: string) => {
+    setHistoryToggle((prev) => ({ ...prev, [bookingId]: !prev[bookingId] }));
   };
 
   const handlePasteInfo = (driverKey: string, booking: LiveBooking) => {
@@ -207,7 +231,8 @@ const AdminDashboardPage: React.FC = () => {
     });
   };
   return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+    <>
+      <div className="min-h-screen bg-black text-white flex flex-col">
       <div className="w-full flex-grow p-4 sm:p-6 md:p-8">
         <div className="max-w-6xl mx-auto w-full space-y-8">
           <AdminPageHeader active="live" liveBadgeCount={liveBadgeCount} />
@@ -330,13 +355,13 @@ const AdminDashboardPage: React.FC = () => {
                                             <div className="flex flex-wrap items-center gap-3">
                                               <button
                                                 type="button"
-                                                onClick={() => toggleDriverConfirmation(driverKey)}
-                                                disabled={bookingLocked}
+                                                onClick={() => confirmDriverToggle(driverKey, Boolean(confirmedDriver))}
+                                                disabled={bookingLocked || !confirmed}
                                                 className={`bg-gray-900 flex items-center gap-2 rounded-full px-3 py-1 text-[11px] font-semibold transition ${
                                                   confirmedDriver
                                                     ? 'bg-green-600/30 text-green-200'
                                                     : 'text-gray-300'
-                                                } ${bookingLocked ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                } ${bookingLocked || !confirmed ? 'opacity-50 cursor-not-allowed' : ''}`}
                                               >
                                                 <span
                                                   className={`w-3 h-3 rounded-full border border-white ${
@@ -344,13 +369,18 @@ const AdminDashboardPage: React.FC = () => {
                                                   }`}
                                                 ></span>
                                                 <span className="text-[11px]">
-                                                  {confirmedDriver ? 'Driver confirmed' : 'Driver confirmation'}
+                                                  {confirmedDriver ? 'Allocated' : 'Allocate to driver'}
                                                 </span>
                                               </button>
                                               <button
                                                 type="button"
                                                 onClick={() => toggleWhatsApp(driverKey)}
-                                                className="flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.4em] text-white transition-colors opacity-80 hover:opacity-100"
+                                                disabled={!confirmed}
+                                                className={`flex items-center gap-1 text-[11px] font-semibold uppercase tracking-[0.4em] transition-colors ${
+                                                  confirmed
+                                                    ? 'text-white opacity-80 hover:opacity-100'
+                                                    : 'text-gray-500 opacity-40 cursor-not-allowed'
+                                                }`}
                                               >
                                                 <span className="flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500/80 text-[10px]">
                                                   <svg viewBox="0 0 24 24" className="h-3 w-3 text-white">
@@ -425,8 +455,8 @@ const AdminDashboardPage: React.FC = () => {
             <section className="bg-green-900/50 border border-gray-800 rounded-2xl p-6 space-y-5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <h2 className="text-xl font-semibold text-white">History</h2>
-                  <p className="text-sm text-gray-400">Older bookings with client + driver confirmation.</p>
+                  <h2 className="text-xl font-semibold text-white">Job history</h2>
+                  <p className="text-sm text-gray-400">Completed bookings with client + driver confirmation.</p>
                 </div>
                 <div className="text-sm text-gray-400">
                   <span className="font-semibold text-white">{jobsDoneEntries.length}</span> trips
@@ -443,18 +473,37 @@ const AdminDashboardPage: React.FC = () => {
                     >
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <p className="text-sm font-semibold text-white">{booking.id}</p>
-                        <button
-                          type="button"
-                          onClick={() => handleReturnToLive(booking)}
-                          className="text-[11px] font-semibold uppercase tracking-[0.3em] rounded-full border border-green-300 px-3 py-1 text-green-300 transition hover:bg-green-300 hover:text-black flex items-center gap-1"
-                        >
-                          <span className="flex h-3 w-3 items-center justify-center rounded-full bg-green-300 text-black text-[10px]">
-                            <svg viewBox="0 0 8 8" className="h-2 w-2" fill="none" xmlns="http://www.w3.org/2000/svg">
-                              <path d="M1 3.5L3.2 5.6 7 1.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                            </svg>
-                          </span>
-                          Completed
-                        </button>
+                        {(() => {
+                          const isCompleted = historyToggle[booking.id] ?? false;
+                          return (
+                            <button
+                              type="button"
+                              onClick={() => toggleHistoryStatus(booking.id)}
+                              className={`text-[11px] font-semibold uppercase tracking-[0.3em] rounded-full px-3 py-1 transition flex items-center gap-1 ${
+                                isCompleted
+                                  ? 'border border-green-300 text-green-300 hover:bg-green-300 hover:text-black'
+                                  : 'border border-amber-300 bg-amber-300 text-black hover:brightness-110'
+                              }`}
+                            >
+                              <span
+                                className={`flex h-3 w-3 items-center justify-center rounded-full text-[10px] ${
+                                  isCompleted ? 'bg-green-300 text-black' : 'bg-black text-amber-300'
+                                }`}
+                              >
+                                {isCompleted ? (
+                                  <svg viewBox="0 0 8 8" className="h-2 w-2" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 3.5L3.2 5.6 7 1.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                                  </svg>
+                                ) : (
+                                  <svg viewBox="0 0 12 12" className="h-2.5 w-2.5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M2 6h8M6 2v8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                                  </svg>
+                                )}
+                              </span>
+                              {isCompleted ? 'Completed' : 'Allocated'}
+                            </button>
+                          );
+                        })()}
                       </div>
                       <p className="text-sm text-gray-300">
                         Pickup: {booking.pickup} � Drop-off: {booking.dropOff}
@@ -491,6 +540,32 @@ const AdminDashboardPage: React.FC = () => {
         </div>
       </div>
     </div>
+
+      {pendingDriverConfirmKey && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-gray-900/90 p-6 shadow-2xl">
+          <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-300 mb-3">Allocate to driver</p>
+          <p className="text-lg text-white mb-6">Do you want to confirm this booking?</p>
+            <div className="flex flex-wrap gap-3 justify-end">
+              <button
+                type="button"
+                onClick={handleCancelDriver}
+                className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-gray-200 hover:border-white/40 transition"
+              >
+                No
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmDriver}
+                className="rounded-full border border-amber-400 bg-amber-400 px-5 py-2 text-sm font-semibold text-black shadow-[0_0_20px_rgba(251,191,36,0.4)] hover:shadow-[0_0_30px_rgba(251,191,36,0.6)] transition"
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import FormLayout from '../components/FormLayout';
 import Input from '../components/Input';
 import Modal from '../components/Modal';
@@ -13,6 +13,7 @@ import ClientLostProperty from './client-dashboard/ClientLostProperty';
 const ClientLoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
+  const location = useLocation();
   const [isComplainModalOpen, setComplainModalOpen] = useState(false);
   const [isReviewModalOpen, setReviewModalOpen] = useState(false);
   const [isLostPropertyModalOpen, setLostPropertyModalOpen] = useState(false);
@@ -22,6 +23,13 @@ const ClientLoginPage: React.FC = () => {
     login(Role.CLIENT);
     navigate('/client/dashboard');
   };
+
+  useEffect(() => {
+    const hash = location.hash.replace('#', '');
+    if (hash === 'complain') setComplainModalOpen(true);
+    if (hash === 'review') setReviewModalOpen(true);
+    if (hash === 'lost-property') setLostPropertyModalOpen(true);
+  }, [location.hash]);
 
   return (
     <FormLayout title="Client Sign In">
@@ -48,6 +56,12 @@ const ClientLoginPage: React.FC = () => {
         <p className="text-center text-sm text-gray-400 !mt-8">
           Don't have an account?{' '}
           <Link to="/client/signup" className="font-medium text-amber-400 hover:underline">
+            Sign up now
+          </Link>
+        </p>
+        <p className="text-center text-sm text-gray-400">
+          You have a corporate account?{' '}
+          <Link to="/corporate/login" className="font-medium text-amber-400 hover:underline">
             Sign up now
           </Link>
         </p>

@@ -9,9 +9,13 @@ import ClientDashboardPage from './pages/ClientDashboardPage';
 import DriverLoginPage from './pages/DriverLoginPage';
 import DriverSignUpPage from './pages/DriverSignUpPage';
 import DriverDashboardPage from './pages/DriverDashboardPage';
+import CorporateLoginPage from './pages/CorporateLoginPage';
+import CorporateSignUpPage from './pages/CorporateSignUpPage';
+import CorporateDashboardPage from './pages/CorporateDashboardPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import AdminDriversPage from './pages/AdminDriversPage';
+import AdminBlogPage from './pages/AdminBlogPage';
 import AlertProvider from './components/AlertProvider';
 import { Role } from './types';
 import type { User, Booking } from './types';
@@ -45,6 +49,9 @@ import ContactPage from './pages/ContactPage';
 import AwaitingApprovalPage from './pages/AwaitingApprovalPage';
 import AdminNotificationsPage from './pages/AdminNotificationsPage';
 import AdminSettingsPage from './pages/AdminSettingsPage';
+import BlogPage from './pages/BlogPage';
+import BlogArticlePage from './pages/BlogArticlePage';
+import ReviewsPage from './pages/ReviewsPage';
 
 // --- AUTH CONTEXT ---
 interface AuthContextType {
@@ -146,7 +153,13 @@ function App() {
             <Route path="/client/signup" element={<ClientSignUpPage />} />
             <Route path="/driver/login" element={<DriverLoginPage />} />
             <Route path="/driver/signup" element={<DriverSignUpPage />} />
+            <Route path="/corporate/login" element={<CorporateLoginPage />} />
+            <Route path="/corporate/signup" element={<CorporateSignUpPage />} />
+            <Route path="/corporate/dashboard" element={<CorporateDashboardPage />} />
             <Route path="/booking" element={<BookingPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<BlogArticlePage />} />
+            <Route path="/reviews" element={<ReviewsPage />} />
             <Route path="/admin" element={<AdminLoginPage />} />
             
             <Route path="/legal/safety-accessibility" element={<SafetyAccessibilityPage />} />
@@ -174,6 +187,11 @@ function App() {
             <Route path="/driver-hub" element={<DriverHubPage />} />
             <Route path="/older-bookings" element={<OlderBookingsPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/admin/blog" element={
+              <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+                <AdminBlogPage />
+              </ProtectedRoute>
+            } />
 
             <Route path="/client/dashboard" element={
               <ProtectedRoute allowedRoles={[Role.CLIENT]}>
@@ -183,6 +201,11 @@ function App() {
             <Route path="/driver/dashboard" element={
               <ProtectedRoute allowedRoles={[Role.DRIVER]}>
                 <DriverDashboardPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/corporate/dashboard" element={
+              <ProtectedRoute allowedRoles={[Role.CLIENT]}>
+                <CorporateDashboardPage />
               </ProtectedRoute>
             } />
             <Route path="/admin/dashboard" element={

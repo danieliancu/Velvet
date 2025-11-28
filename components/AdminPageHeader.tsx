@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
 
 type NavItem = {
-  id: 'live' | 'older' | 'drivers' | 'awaiting' | 'notifications' | 'settings';
+  id: 'live' | 'older' | 'drivers' | 'awaiting' | 'notifications' | 'settings' | 'blog';
   label: string;
   to: string;
   badge?: number;
@@ -33,7 +33,7 @@ const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({ active, liveBadgeCoun
     },
     {
       id: 'older',
-      label: 'Older bookings',
+      label: 'Job history',
       to: '/older-bookings'
     },
     {
@@ -52,6 +52,11 @@ const AdminPageHeader: React.FC<AdminPageHeaderProps> = ({ active, liveBadgeCoun
       label: 'Notifications',
       to: '/admin/notifications',
       badge: 8
+    },
+    {
+      id: 'blog',
+      label: 'Blog',
+      to: '/admin/blog'
     },
     {
       id: 'settings',

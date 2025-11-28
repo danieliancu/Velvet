@@ -3,7 +3,7 @@ import React, { useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../App';
 import { useAlert } from '../components/AlertProvider';
-import { Clock, User, DollarSign, Car } from 'lucide-react';
+import { Clock, User, Car } from 'lucide-react';
 import PageShell from '../components/PageShell';
 import DashboardInput from '../components/DashboardInput';
 
@@ -83,7 +83,7 @@ const DriverJobs: React.FC = () => (
                     </div>
                     <div className="border-t border-gray-700 pt-4 space-y-2">
                     <p className="flex items-center gap-2 text-gray-300"><User size={16} /> Client: {job.client}</p>
-                    <p className="flex items-center gap-2 text-gray-300"><DollarSign size={16} /> Est. Pay: £{job.pay.toFixed(2)}</p>
+                    <p className="text-gray-300">Est. Pay: £{job.pay.toFixed(2)}</p>
                     </div>
                     <div className="flex gap-4 pt-2">
                         <button className="flex-1 px-4 py-2 bg-green-600/80 hover:bg-green-600 rounded-md transition-colors">Accept</button>
@@ -99,22 +99,24 @@ const DriverJobs: React.FC = () => (
         )}
 
         <h2 className="text-2xl font-semibold mt-12 mb-4">Completed Jobs</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-3">
             {mockCompletedJobs.map(job => (
-                <div key={job.id} className="bg-gray-900/50 border border-gray-800 rounded-lg p-6 space-y-4 opacity-70">
-                    <div className="flex flex-col md:flex-row md:justify-between items-start gap-2">
-                        <div>
-                            <h3 className="text-xl font-bold text-amber-400/80">{job.pickup}</h3>
-                            <p className="text-lg text-white/80">to {job.destination}</p>
-                        </div>
-                        <div className="text-right">
-                            <p className="text-lg font-semibold flex items-center gap-2 text-gray-400"><Clock size={16} /> {job.time}</p>
-                        </div>
-                    </div>
-                    <div className="border-t border-gray-700 pt-4 space-y-2">
-                    <p className="flex items-center gap-2 text-gray-400"><User size={16} /> Client: {job.client}</p>
-                    <p className="flex items-center gap-2 text-gray-400"><DollarSign size={16} /> Pay: £{job.pay.toFixed(2)}</p>
-                    </div>
+                <div
+                  key={job.id}
+                  className="rounded-lg border border-gray-800 bg-gray-900/60 px-4 py-3 shadow-inner shadow-black/30"
+                >
+                  <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                    <p className="text-base font-semibold text-white">
+                      {job.pickup} <span className="text-amber-300">to</span> {job.destination}
+                    </p>
+                    <p className="text-sm text-gray-300 flex items-center gap-2">
+                      <Clock size={14} /> {job.time}
+                    </p>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mt-2 text-sm text-gray-300">
+                    <span className="flex items-center gap-2"><User size={14} /> Client: {job.client}</span>
+                    <span className="font-semibold text-white">Pay: £{job.pay.toFixed(2)}</span>
+                  </div>
                 </div>
             ))}
         </div>
@@ -740,20 +742,20 @@ const DriverDashboardPage: React.FC = () => {
     navigate('/');
   };
 
-  const tabs = ['Dashboard', 'Jobs', 'Car(s)', 'Monthly Statement'];
+  const tabs = ['Jobs', 'Dashboard', 'Car(s)', 'Monthly Statement'];
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'Dashboard':
-        return <DriverProfile />;
       case 'Jobs':
         return <DriverJobs />;
+      case 'Dashboard':
+        return <DriverProfile />;
       case 'Car(s)':
         return <CarsPage />;
       case 'Monthly Statement':
         return <MonthlyStatement />;
       default:
-        return <DriverProfile />;
+        return <DriverJobs />;
     }
   };
   
