@@ -24,7 +24,14 @@ const Footer: React.FC = () => {
               <p>Licensed, professional, and passenger-first private hire services.</p>
             </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 md:gap-10 w-full md:w-auto md:ml-auto">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 md:gap-10 w-full md:w-auto md:ml-auto">
+            <div className="min-w-[170px]">
+              <h4 className="font-bold font-display text-white text-lg mb-4">Discover</h4>
+              <ul className="space-y-2">
+                <FooterLink to="/blog">Our Blog</FooterLink>
+                <FooterLink to="/reviews">Client Reviews</FooterLink>
+              </ul>
+            </div>
             <div className="min-w-[170px]">
               <h4 className="font-bold font-display text-white text-lg mb-4">Company</h4>
               <ul className="space-y-2">

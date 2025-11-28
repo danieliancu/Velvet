@@ -25,7 +25,7 @@ const StatusBadge: React.FC<{ status: Journey['status'] }> = ({ status }) => {
 type FilterStatus = 'All' | 'Completed' | 'Upcoming';
 
 const ClientHistory: React.FC = () => {
-    const [filter, setFilter] = useState<FilterStatus>('All');
+    const [filter, setFilter] = useState<FilterStatus>('Upcoming');
     const [query, setQuery] = useState('');
 
     const filteredJourneys = mockJourneys.filter(journey => {
