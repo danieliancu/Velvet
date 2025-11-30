@@ -424,9 +424,19 @@ const BookingPage: React.FC = () => {
             try {
                 const isIcao = /^[A-Z]{3}\d+/i.test(callsign);
                 const queryKey = isIcao ? 'flight_icao' : 'flight_iata';
-                const res = await fetch(`${baseUrl}/flight?${queryKey}=${encodeURIComponent(callsign)}&api_key=${apiKey}`, {
-                    signal: controller.signal,
-                });
+                const fetchOnce = async (base: string) => {
+                    const res = await fetch(`${base}/flight?${queryKey}=${encodeURIComponent(callsign)}&api_key=${apiKey}`, {
+                        signal: controller.signal,
+                    });
+                    return res;
+                };
+
+                let res = await fetchOnce(baseUrl);
+                if (res.status === 404 && baseUrl.startsWith('/api/')) {
+                    // Likely missing proxy in production; retry direct AirLabs
+                    res = await fetchOnce('https://airlabs.co/api/v9');
+                }
+
                 if (!res.ok) {
                     if (res.status === 401) throw new Error('AirLabs auth failed (401). Check API key or quota.');
                     if (res.status === 404) throw new Error('AirLabs flight endpoint not found.');
