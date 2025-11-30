@@ -30,6 +30,7 @@ const Footer: React.FC = () => {
               <ul className="space-y-2">
                 <FooterLink to="/blog">Our Blog</FooterLink>
                 <FooterLink to="/reviews">Client Reviews</FooterLink>
+                <FooterLink to="/website-map">Website Map</FooterLink>
               </ul>
             </div>
             <div className="min-w-[170px]">

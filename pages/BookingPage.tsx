@@ -16,6 +16,19 @@ type PlaceResult = {
     location?: { lat: number; lng: number };
 };
 
+type FlightDetails = {
+    number: string;
+    status?: string;
+    dep?: string;
+    arr?: string;
+    depTimeUtc?: string;
+    arrTimeUtc?: string;
+    latitude?: number;
+    longitude?: number;
+    altitudeMeters?: number;
+    speedKmh?: number;
+};
+
 const BookingPage: React.FC = () => {
     const navigate = useNavigate();
     const { addBooking } = useBookings();
@@ -45,6 +58,10 @@ const BookingPage: React.FC = () => {
     const [passengerPhone, setPassengerPhone] = useState('');
     const [specialEvents, setSpecialEvents] = useState('');
     const [notes, setNotes] = useState('');
+    const [flightNumber, setFlightNumber] = useState('');
+    const [flightDetails, setFlightDetails] = useState<FlightDetails | null>(null);
+    const [flightLoading, setFlightLoading] = useState(false);
+    const [flightError, setFlightError] = useState<string | null>(null);
 
     const passengersCount = Math.max(0, Number(passengers) || 0);
     const smallSuitcasesCount = Math.max(0, Number(smallSuitcases) || 0);
@@ -284,6 +301,7 @@ const BookingPage: React.FC = () => {
 
     const milesValue = Number(miles) || 0;
     const isAirportOrTerminal = (value: string) => /(airport|terminal)/i.test(value);
+    const airportDetected = isAirportOrTerminal(pickup) || dropOffs.some((addr) => isAirportOrTerminal(addr));
 
     const getMileageRate = (veh: string, dist: number) => {
         if (veh === 'Executive') {
@@ -370,6 +388,88 @@ const BookingPage: React.FC = () => {
     };
     
     const { showAlert } = useAlert();
+
+    useEffect(() => {
+        if (!airportDetected) {
+            setFlightNumber('');
+            setFlightDetails(null);
+            setFlightLoading(false);
+            setFlightError(null);
+        }
+    }, [airportDetected]);
+
+    useEffect(() => {
+        if (!flightNumber.trim()) {
+            setFlightDetails(null);
+            setFlightLoading(false);
+            setFlightError(null);
+            return;
+        }
+
+        const baseUrl = import.meta.env.VITE_AIRLABS_PROXY_URL || 'https://airlabs.co/api/v9';
+        const apiKey = import.meta.env.VITE_AIRLABS_API_KEY;
+        if (!apiKey) {
+            setFlightError('Configure VITE_AIRLABS_API_KEY to fetch live flight data.');
+            setFlightDetails(null);
+            setFlightLoading(false);
+            return;
+        }
+
+        const callsign = flightNumber.trim().toUpperCase();
+        setFlightLoading(true);
+        setFlightError(null);
+        const controller = new AbortController();
+
+        const fetchFlight = async () => {
+            try {
+                const isIcao = /^[A-Z]{3}\d+/i.test(callsign);
+                const queryKey = isIcao ? 'flight_icao' : 'flight_iata';
+                const res = await fetch(`${baseUrl}/flight?${queryKey}=${encodeURIComponent(callsign)}&api_key=${apiKey}`, {
+                    signal: controller.signal,
+                });
+                if (!res.ok) {
+                    if (res.status === 401) throw new Error('AirLabs auth failed (401). Check API key or quota.');
+                    if (res.status === 404) throw new Error('AirLabs flight endpoint not found.');
+                    throw new Error(`AirLabs responded ${res.status}`);
+                }
+                const data = await res.json();
+                if (data?.error) {
+                    throw new Error(data.error.message || 'AirLabs error');
+                }
+                const flight = data?.response;
+                if (!flight) {
+                    setFlightDetails(null);
+                    setFlightError('No live flight found for this flight code right now.');
+                    return;
+                }
+                const detail: FlightDetails = {
+                    number: flight.flight_icao || flight.flight_iata || callsign,
+                    status: flight.status,
+                    dep: flight.dep_iata || flight.dep_icao,
+                    arr: flight.arr_iata || flight.arr_icao,
+                    depTimeUtc: flight.dep_time_utc,
+                    arrTimeUtc: flight.arr_time_utc,
+                    latitude: flight.lat,
+                    longitude: flight.lng,
+                    altitudeMeters: typeof flight.alt === 'number' ? flight.alt : undefined,
+                    speedKmh: typeof flight.speed === 'number' ? Math.round(flight.speed) : undefined,
+                };
+                setFlightDetails(detail);
+            } catch (err: any) {
+                if (controller.signal.aborted) return;
+                setFlightDetails(null);
+                setFlightError(err?.message || 'Failed to fetch flight');
+            } finally {
+                if (!controller.signal.aborted) setFlightLoading(false);
+            }
+        };
+
+        const timer = setTimeout(fetchFlight, 450);
+        return () => {
+            controller.abort();
+            clearTimeout(timer);
+        };
+    }, [flightNumber]);
 
     const handleSubmitBooking = (e: React.FormEvent) => {
         e.preventDefault();
@@ -464,6 +564,54 @@ const BookingPage: React.FC = () => {
                                     <PlusCircle size={18} /> Add another stop
                                  </button>
                             </div>
+
+                            {airportDetected && (
+                                <div className="md:col-span-2 bg-[#2a1a1a]/60 border border-amber-900/40 rounded-lg p-4 space-y-3">
+                                    <div className="flex flex-wrap items-center justify-between gap-3">
+                                        <p className="text-sm font-semibold text-amber-200">Airport detected</p>
+                                        <p className="text-xs text-gray-400">Add flight number so we prep meet & greet</p>
+                                    </div>
+                                    <BookingInput
+                                        label="Flight number"
+                                        id="flight-number"
+                                        placeholder="e.g. BA984"
+                                        value={flightNumber}
+                                        onChange={(e) => setFlightNumber(e.target.value.toUpperCase())}
+                                    />
+                                    {flightNumber && (
+                                        <div className="bg-black/30 border border-amber-900/40 rounded-md p-3 text-sm text-amber-100 space-y-2">
+                                            {flightLoading && <p className="text-gray-400">Fetching live flight details...</p>}
+                                            {!flightLoading && flightError && (
+                                                <p className="text-red-300">{flightError}</p>
+                                            )}
+                                            {!flightLoading && flightDetails && (
+                                                <div className="space-y-1">
+                                                    <p className="text-amber-300 font-semibold">{flightDetails.number} {flightDetails.status ? `· ${flightDetails.status}` : ''}</p>
+                                                    <p className="text-gray-200">Route: {flightDetails.dep || '—'} → {flightDetails.arr || '—'}</p>
+                                                    {flightDetails.depTimeUtc && (
+                                                        <p className="text-gray-200 text-xs">Dep (UTC): {flightDetails.depTimeUtc}</p>
+                                                    )}
+                                                    {flightDetails.arrTimeUtc && (
+                                                        <p className="text-gray-200 text-xs">Arr (UTC): {flightDetails.arrTimeUtc}</p>
+                                                    )}
+                                                    {flightDetails.latitude != null && flightDetails.longitude != null && (
+                                                        <p className="text-gray-200">Position: {flightDetails.latitude.toFixed(2)}, {flightDetails.longitude.toFixed(2)}</p>
+                                                    )}
+                                                    {flightDetails.altitudeMeters != null && (
+                                                        <p className="text-gray-200">Altitude: {Math.round(flightDetails.altitudeMeters)} m</p>
+                                                    )}
+                                                    {flightDetails.speedKmh != null && (
+                                                        <p className="text-gray-200">Speed: {flightDetails.speedKmh} km/h</p>
+                                                    )}
+                                                </div>
+                                            )}
+                                            {!flightLoading && !flightDetails && !flightError && (
+                                                <p className="text-gray-400">Add a valid flight number to see live telemetry.</p>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             <BookingInput label="Date" id="date" type="text" onFocus={(e) => (e.target.type = 'date')} onBlur={(e) => (e.target.type = 'text')} placeholder="dd/mm/yyyy" icon={<Calendar size={20} className="text-gray-400" />} value={date} onChange={e => setDate(e.target.value)} required />
                             <BookingInput label="Time" id="time" type="text" onFocus={(e) => (e.target.type = 'time')} onBlur={(e) => (e.target.type = 'text')} placeholder="--:--" icon={<Clock size={20} className="text-gray-400" />} value={time} onChange={e => setTime(e.target.value)} required />

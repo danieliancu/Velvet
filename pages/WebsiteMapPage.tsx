@@ -1,0 +1,112 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import PageShell from '../components/PageShell';
+
+interface SitemapSection {
+  title: string;
+  description: string;
+  links: { label: string; to: string; note?: string }[];
+}
+
+// Curated overview of the main destinations across the site.
+const sitemapSections: SitemapSection[] = [
+  {
+    title: 'Discover',
+    description: 'Learn more about the Velvet experience and keep up with updates.',
+    links: [
+      { label: 'Home', to: '/' },
+      { label: 'Our Blog', to: '/blog' },
+      { label: 'Client Reviews', to: '/reviews' },
+      { label: 'Contact', to: '/contact' },
+      { label: 'Website Map', to: '/website-map', note: 'You are here' }
+    ]
+  },
+  {
+    title: 'Book & Manage',
+    description: 'Start a new journey or access your account to manage bookings.',
+    links: [
+      { label: 'Book a Journey', to: '/booking' },
+      { label: 'Older Bookings', to: '/older-bookings' },
+      { label: 'Client Login', to: '/client/login' },
+      { label: 'Driver Login', to: '/driver/login' },
+      { label: 'Corporate Login', to: '/corporate/login' }
+    ]
+  },
+  {
+    title: 'Drivers & Partners',
+    description: 'Resources for professional drivers and corporate partners.',
+    links: [
+      { label: 'Driver Hub', to: '/driver-hub' },
+      { label: 'Driver Sign Up', to: '/driver/signup' },
+      { label: 'Corporate Sign Up', to: '/corporate/signup' },
+      { label: 'Corporate Dashboard', to: '/corporate/dashboard', note: 'Requires login' },
+      { label: 'Corporate Terms', to: '/corporate-terms' }
+    ]
+  },
+  {
+    title: 'Policies & Safety',
+    description: 'All legal, safety, and compliance information in one place.',
+    links: [
+      { label: 'Operator Policies', to: '/legal/operator-policies' },
+      { label: 'Passenger Policies', to: '/legal/passenger-policies' },
+      { label: 'Safety & Accessibility', to: '/legal/safety-accessibility' },
+      { label: 'Privacy & Data', to: '/legal/privacy-data' },
+      { label: 'Corporate Payment Policy', to: '/corporate-payment-policy' },
+      { label: 'Terms of Service', to: '/terms-of-service' },
+      { label: 'Cookie Policy', to: '/cookie-policy' }
+    ]
+  }
+];
+
+const WebsiteMapPage: React.FC = () => {
+  return (
+    <PageShell mainClassName="pt-28 pb-16">
+      <div className="max-w-6xl mx-auto space-y-10">
+        <div className="space-y-3">
+          <p className="text-sm uppercase tracking-[0.3em] text-amber-300/70">Navigate</p>
+          <h1 className="text-4xl md:text-5xl font-display font-bold text-white">Website Map</h1>
+          <p className="text-lg text-gray-300 max-w-3xl">
+            Quickly jump to any area of Velvet Drivers. Every key destination is grouped so you
+            can find the right page without digging through menus.
+          </p>
+        </div>
+
+        <div className="grid gap-6 md:grid-cols-2">
+          {sitemapSections.map((section) => (
+            <section
+              key={section.title}
+              className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6 shadow-2xl shadow-red-950/50"
+            >
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <div>
+                  <h2 className="text-xl font-display font-semibold text-amber-300">{section.title}</h2>
+                  <p className="text-sm text-gray-400">{section.description}</p>
+                </div>
+                <div className="h-10 w-10 rounded-full bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-300 text-xs font-semibold">
+                  {section.links.length.toString().padStart(2, '0')}
+                </div>
+              </div>
+              <div className="grid sm:grid-cols-2 gap-3">
+                {section.links.map((link) => (
+                  <Link
+                    key={link.label}
+                    to={link.to}
+                    className="group flex items-center justify-between rounded-lg border border-white/5 bg-black/30 px-4 py-3 text-sm text-gray-200 hover:border-amber-400/70 hover:text-white transition-all"
+                  >
+                    <span className="flex flex-col">
+                      {link.label}
+                      {link.note && <span className="text-[11px] text-gray-400">{link.note}</span>}
+                    </span>
+                    <span className="text-amber-300 opacity-0 group-hover:opacity-100 transition-opacity">&#8594;</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      </div>
+    </PageShell>
+  );
+};
+
+export default WebsiteMapPage;

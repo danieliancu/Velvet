@@ -52,6 +52,7 @@ import AdminSettingsPage from './pages/AdminSettingsPage';
 import BlogPage from './pages/BlogPage';
 import BlogArticlePage from './pages/BlogArticlePage';
 import ReviewsPage from './pages/ReviewsPage';
+import WebsiteMapPage from './pages/WebsiteMapPage';
 
 // --- AUTH CONTEXT ---
 interface AuthContextType {
@@ -187,6 +188,7 @@ function App() {
             <Route path="/driver-hub" element={<DriverHubPage />} />
             <Route path="/older-bookings" element={<OlderBookingsPage />} />
             <Route path="/contact" element={<ContactPage />} />
+            <Route path="/website-map" element={<WebsiteMapPage />} />
             <Route path="/admin/blog" element={
               <ProtectedRoute allowedRoles={[Role.ADMIN]}>
                 <AdminBlogPage />

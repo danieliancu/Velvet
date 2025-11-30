@@ -9,6 +9,26 @@ export default defineConfig(({ mode }) => {
         port: 3000,
         host: '0.0.0.0',
         proxy: {
+          '/api/opensky': {
+            target: 'https://opensky-network.org',
+            changeOrigin: true,
+            secure: true,
+            rewrite: (p) => p.replace(/^\/api\/opensky/, '/api'),
+            configure: (proxy) => {
+              proxy.on('proxyRes', (proxyRes) => {
+                // Prevent browser basic-auth popups on upstream 401
+                if (proxyRes.headers['www-authenticate']) {
+                  delete proxyRes.headers['www-authenticate'];
+                }
+              });
+            },
+          },
+          '/api/airlabs': {
+            target: 'https://airlabs.co',
+            changeOrigin: true,
+            secure: true,
+            rewrite: (p) => p.replace(/^\/api\/airlabs/, '/api/v9'),
+          },
           '/api/dvla': {
             target: 'https://driver-vehicle-licensing.api.gov.uk',
             changeOrigin: true,
