@@ -67,7 +67,7 @@ const WebsiteMapPage: React.FC = () => {
           <h1 className="text-4xl md:text-5xl font-display font-bold text-white">Sitemap</h1>
         </div>
 
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid gap-6 grid-cols-1">
           {sitemapSections.map((section) => (
             <section
               key={section.title}
@@ -79,7 +79,7 @@ const WebsiteMapPage: React.FC = () => {
                   <p className="text-sm text-gray-400">{section.description}</p>
                 </div>
               </div>
-              <div className="grid sm:grid-cols-2 gap-3">
+              <div className="flex flex-col gap-3">
                 {section.links.map((link) => (
                   <Link
                     key={link.label}

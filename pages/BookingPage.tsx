@@ -743,8 +743,28 @@ const BookingPage: React.FC = () => {
                                 </div>
                             )}
 
-                            <BookingInput label="Date" id="date" type="text" onFocus={(e) => (e.target.type = 'date')} onBlur={(e) => (e.target.type = 'text')} placeholder="dd/mm/yyyy" icon={<Calendar size={20} className="text-gray-400" />} value={date} onChange={e => setDate(e.target.value)} required />
-                            <BookingInput label="Time" id="time" type="text" onFocus={(e) => (e.target.type = 'time')} onBlur={(e) => (e.target.type = 'text')} placeholder="--:--" icon={<Clock size={20} className="text-gray-400" />} value={time} onChange={e => setTime(e.target.value)} required />
+                            <BookingInput
+                                label="Date"
+                                id="date"
+                                type="date"
+                                inputMode="numeric"
+                                placeholder="yyyy-mm-dd"
+                                icon={<Calendar size={20} className="text-gray-400" />}
+                                value={date}
+                                onChange={e => setDate(e.target.value)}
+                                required
+                            />
+                            <BookingInput
+                                label="Time"
+                                id="time"
+                                type="time"
+                                inputMode="numeric"
+                                placeholder="--:--"
+                                icon={<Clock size={20} className="text-gray-400" />}
+                                value={time}
+                                onChange={e => setTime(e.target.value)}
+                                required
+                            />
                              <BookingSelect label="Vehicle" id="vehicle" value={vehicle} onChange={e => setVehicle(e.target.value)}>
                                 <option value="Luxury MPV">Luxury MPV</option>
                                 <option value="Luxury" disabled={!luxuryAllowed}>Luxury</option>
