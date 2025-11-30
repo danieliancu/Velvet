@@ -12,6 +12,11 @@ type SettingsState = {
     luxury: { tier1: string; tier2: string; tier3: string };
     mpv: { tier1: string; tier2: string; tier3: string };
   };
+  innerZoneOverride: {
+    executive: string;
+    luxury: string;
+    mpv: string;
+  };
   surcharges: {
     airportPickup: string;
     airportDropoff: string;
@@ -30,6 +35,11 @@ const AdminSettingsPage: React.FC = () => {
       executive: { tier1: '6.25', tier2: '2.5', tier3: '2' },
       luxury: { tier1: '8.75', tier2: '3.5', tier3: '3' },
       mpv: { tier1: '10', tier2: '4', tier3: '3.5' }
+    },
+    innerZoneOverride: {
+      executive: '6.25',
+      luxury: '8.75',
+      mpv: '10'
     },
     surcharges: {
       airportPickup: '15',
@@ -71,6 +81,13 @@ const AdminSettingsPage: React.FC = () => {
     setSettings((prev) => ({
       ...prev,
       surcharges: { ...prev.surcharges, [key]: value }
+    }));
+  };
+
+  const updateInnerZoneOverride = (key: keyof SettingsState['innerZoneOverride'], value: string) => {
+    setSettings((prev) => ({
+      ...prev,
+      innerZoneOverride: { ...prev.innerZoneOverride, [key]: value }
     }));
   };
 
@@ -219,6 +236,51 @@ const AdminSettingsPage: React.FC = () => {
 
               <div className="rounded-xl border border-white/10 bg-black/50 p-4 space-y-3">
                 <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h3 className="text-lg font-semibold text-white">Zone 1-4 override</h3>
+                  <p className="text-xs text-gray-400">Rate per mile applied to any leg touching Zones 1-4</p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm text-gray-200">
+                  <label className="rounded-lg border border-white/10 bg-[#161010] p-3 flex items-center justify-between gap-2">
+                    <span>Executive</span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        className="w-20 rounded-md border border-white/10 bg-[#1c1c1c] px-2 py-1 text-right text-white"
+                        value={settings.innerZoneOverride.executive}
+                        onChange={(e) => updateInnerZoneOverride('executive', e.target.value)}
+                      />
+                      <span className="text-[11px] text-gray-500">£/mile</span>
+                    </div>
+                  </label>
+                  <label className="rounded-lg border border-white/10 bg-[#161010] p-3 flex items-center justify-between gap-2">
+                    <span>Luxury</span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        className="w-20 rounded-md border border-white/10 bg-[#1c1c1c] px-2 py-1 text-right text-white"
+                        value={settings.innerZoneOverride.luxury}
+                        onChange={(e) => updateInnerZoneOverride('luxury', e.target.value)}
+                      />
+                      <span className="text-[11px] text-gray-500">£/mile</span>
+                    </div>
+                  </label>
+                  <label className="rounded-lg border border-white/10 bg-[#161010] p-3 flex items-center justify-between gap-2">
+                    <span>Luxury MPV</span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        className="w-20 rounded-md border border-white/10 bg-[#1c1c1c] px-2 py-1 text-right text-white"
+                        value={settings.innerZoneOverride.mpv}
+                        onChange={(e) => updateInnerZoneOverride('mpv', e.target.value)}
+                      />
+                      <span className="text-[11px] text-gray-500">£/mile</span>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-white/10 bg-black/50 p-4 space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <h3 className="text-lg font-semibold text-white">Google Maps surcharges</h3>
                   <p className="text-xs text-gray-400">Control fees applied in fare calculation</p>
                 </div>
@@ -255,6 +317,7 @@ const AdminSettingsPage: React.FC = () => {
                         className="w-20 rounded-md border border-white/10 bg-[#1c1c1c] px-2 py-1 text-right text-white"
                         value={settings.surcharges.congestion}
                         onChange={(e) => updateSurcharge('congestion', e.target.value)}
+                        disabled
                       />
                       <span className="text-[11px] text-gray-500">£</span>
                     </div>
