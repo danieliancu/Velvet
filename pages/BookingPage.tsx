@@ -47,6 +47,14 @@ const BookingPage: React.FC = () => {
     const [pickupLatLng, setPickupLatLng] = useState<{ lat: number; lng: number } | null>(null);
     const [dropOffLatLng, setDropOffLatLng] = useState<{ lat: number; lng: number } | null>(null);
     const [stopCoords, setStopCoords] = useState<Array<{ lat: number; lng: number } | null>>([null]);
+    const [legBreakdown, setLegBreakdown] = useState<Array<{
+        miles: number;
+        originLabel: string;
+        destinationLabel: string;
+        originZone: number | null;
+        destinationZone: number | null;
+        appliedZone: number | null;
+    }>>([]);
     const googleLoadPromise = useRef<Promise<void> | null>(null);
     const pickupInputRef = useRef<HTMLInputElement | null>(null);
     const dropoffInputRefs = useRef<Array<HTMLInputElement | null>>([]);
@@ -67,6 +75,61 @@ const BookingPage: React.FC = () => {
     const smallSuitcasesCount = Math.max(0, Number(smallSuitcases) || 0);
     const largeSuitcasesCount = Math.max(0, Number(largeSuitcases) || 0);
     const waitingMinutes = Math.max(0, Number(waiting) || 0);
+
+    const LONDON_CENTER = { lat: 51.509865, lng: -0.118092 }; // Charing Cross
+    // Zones are concentric rings around central London; tweak radii to match your own map pricing.
+    const zoneRings = [
+        { id: 1, name: 'Zone 1', radiusMiles: 3 },
+        { id: 2, name: 'Zone 2', radiusMiles: 6 },
+        { id: 3, name: 'Zone 3', radiusMiles: 9 },
+        { id: 4, name: 'Zone 4', radiusMiles: 12 },
+        { id: 5, name: 'Zone 5', radiusMiles: 15 },
+        { id: 6, name: 'Zone 6', radiusMiles: 20 },
+        { id: 7, name: 'Zone 7', radiusMiles: 25 },
+        { id: 8, name: 'Zone 8', radiusMiles: 30 },
+        { id: 9, name: 'Zone 9', radiusMiles: 40 },
+    ];
+
+    const haversineMiles = (a: { lat: number; lng: number }, b: { lat: number; lng: number }) => {
+        const toRad = (deg: number) => (deg * Math.PI) / 180;
+        const R = 6371; // km
+        const dLat = toRad(b.lat - a.lat);
+        const dLon = toRad(b.lng - a.lng);
+        const lat1 = toRad(a.lat);
+        const lat2 = toRad(b.lat);
+        const sinLat = Math.sin(dLat / 2);
+        const sinLon = Math.sin(dLon / 2);
+        const aHarv = sinLat * sinLat + Math.cos(lat1) * Math.cos(lat2) * sinLon * sinLon;
+        const c = 2 * Math.atan2(Math.sqrt(aHarv), Math.sqrt(1 - aHarv));
+        const distanceKm = R * c;
+        return distanceKm * 0.621371; // miles
+    };
+
+    const getZoneForCoords = (coords: { lat: number; lng: number }) => {
+        const milesFromCenter = haversineMiles(coords, LONDON_CENTER);
+        const zone = zoneRings.find((z) => milesFromCenter <= z.radiusMiles);
+        return zone ?? zoneRings[zoneRings.length - 1];
+    };
+
+    // Mileage rates by vehicle and zone bands (inner = zones 1-3, mid = 4-6, outer = 7-9).
+    const zoneMileageRates: Record<string, { inner: number; mid: number; outer: number }> = {
+        Executive: { inner: 6.25, mid: 2.5, outer: 2 },
+        Luxury: { inner: 8.75, mid: 3.5, outer: 3 },
+        'Luxury MPV': { inner: 10, mid: 4, outer: 3.5 },
+    };
+
+    const getZoneMileageRate = (veh: string, zoneId: number | null) => {
+        const bands = zoneMileageRates[veh] ?? zoneMileageRates['Luxury MPV'];
+        if (!zoneId) return bands.mid;
+        if (zoneId <= 3) return bands.inner;
+        if (zoneId <= 6) return bands.mid;
+        return bands.outer;
+    };
+
+    const pickAppliedZone = (originZone: number | null, destinationZone: number | null) => {
+        if (originZone && destinationZone) return Math.max(originZone, destinationZone);
+        return originZone ?? destinationZone ?? null;
+    };
 
     const withinLuxuryExecLuggage = () => {
         const largeOk = largeSuitcasesCount <= 2;
@@ -237,6 +300,7 @@ const BookingPage: React.FC = () => {
         const coordChain = [pickupLatLng, ...stopCoords];
         if (waypoints.length < 2) {
             setMiles('');
+            setLegBreakdown([]);
             return;
         }
 
@@ -259,6 +323,14 @@ const BookingPage: React.FC = () => {
         let isCancelled = false;
         (async () => {
             let totalMeters = 0;
+            const legs: Array<{
+                miles: number;
+                originLabel: string;
+                destinationLabel: string;
+                originZone: number | null;
+                destinationZone: number | null;
+                appliedZone: number | null;
+            }> = [];
             for (let i = 0; i < waypoints.length - 1; i += 1) {
                 const originCandidate = coordChain[i];
                 const destCandidate = coordChain[i + 1];
@@ -267,12 +339,26 @@ const BookingPage: React.FC = () => {
                 const meters = await getLegDistance(origin, destination);
                 if (meters == null) continue;
                 totalMeters += meters;
+                const milesValueLeg = meters / 1609.34;
+                const originZone = originCandidate ? getZoneForCoords(originCandidate) : null;
+                const destinationZone = destCandidate ? getZoneForCoords(destCandidate) : null;
+                const appliedZone = pickAppliedZone(originZone?.id ?? null, destinationZone?.id ?? null);
+                legs.push({
+                    miles: milesValueLeg,
+                    originLabel: waypoints[i],
+                    destinationLabel: waypoints[i + 1],
+                    originZone: originZone?.id ?? null,
+                    destinationZone: destinationZone?.id ?? null,
+                    appliedZone,
+                });
             }
             if (!isCancelled && totalMeters > 0) {
+                setLegBreakdown(legs);
                 const milesValue = (totalMeters / 1609.34).toFixed(1);
                 setMiles(milesValue);
             } else if (!isCancelled) {
                 setMiles('');
+                setLegBreakdown([]);
             }
         })();
 
@@ -326,35 +412,54 @@ const BookingPage: React.FC = () => {
     const waitingCost = serviceType === 'As Directed' ? 0 : waitingMinutes * (waitingRatePerHour / 60);
     const hourlyRate = vehicle === 'Executive' ? 40 : 60;
 
-    if (serviceType === 'As Directed') {
-        totalFare = hourlyRate; // base hourly; extras applied below
-    } else {
-        const rate = getMileageRate(vehicle, milesValue);
-        totalFare += milesValue * rate;
-        if (waitingCost > 0) extras.push(`Waiting time £${waitingCost.toFixed(2)}`);
+    const includesZoneOneToFour =
+        legBreakdown.length > 0 &&
+        legBreakdown.some((leg) => {
+            const zones = [leg.appliedZone, leg.originZone, leg.destinationZone].filter((z): z is number => z != null);
+            return zones.some((z) => z <= 4);
+        });
+
+    const zoneMileageFare =
+        serviceType === 'As Directed'
+            ? 0
+            : legBreakdown.length && legBreakdown.every((leg) => leg.appliedZone !== null)
+                ? legBreakdown.reduce((sum, leg) => sum + leg.miles * getZoneMileageRate(vehicle, leg.appliedZone), 0)
+                : null;
+
+    const mileageFare =
+        serviceType === 'As Directed'
+            ? hourlyRate
+            : includesZoneOneToFour
+                ? milesValue * getMileageRate(vehicle, 10) // force 1-10 mile rate for any ride touching zones 1-4
+                : (zoneMileageFare ?? milesValue * getMileageRate(vehicle, milesValue));
+
+    totalFare = mileageFare;
+
+    if (serviceType !== 'As Directed') {
+        if (waitingCost > 0) extras.push(`Waiting time GBP${waitingCost.toFixed(2)}`);
         totalFare += waitingCost;
     }
 
     if (isNightTime()) {
         totalFare += 30;
-        extras.push('Night surcharge £30');
+        extras.push('Night surcharge GBP30');
     }
     if (isAirportOrTerminal(pickup)) {
         totalFare += 15;
-        extras.push('Airport/terminal pickup £15');
+        extras.push('Airport/terminal pickup GBP15');
     }
     if (dropOffs.some(addr => isAirportOrTerminal(addr))) {
         totalFare += 7;
-        extras.push('Airport/terminal drop-off £7');
+        extras.push('Airport/terminal drop-off GBP7');
     }
     totalFare = Math.round(totalFare * 100) / 100;
 
     const extrasAmount = serviceType === 'As Directed' ? totalFare - hourlyRate : 0;
     const fareDisplay = serviceType === 'As Directed'
         ? extrasAmount > 0
-            ? `£${hourlyRate.toFixed(2)}/h + £${extrasAmount.toFixed(2)}`
-            : `£${hourlyRate.toFixed(2)}/h`
-        : `£${totalFare.toFixed(2)}`;
+            ? `GBP${hourlyRate.toFixed(2)}/h + GBP${extrasAmount.toFixed(2)}`
+            : `GBP${hourlyRate.toFixed(2)}/h`
+        : `GBP${totalFare.toFixed(2)}`;
 
     const extrasText =
         extras.length
@@ -362,6 +467,16 @@ const BookingPage: React.FC = () => {
             : serviceType === 'As Directed'
                 ? 'Includes hourly rate. No extras applied.'
                 : 'Includes mileage (tiered by vehicle). No extras applied.';
+
+    const zoneIds = legBreakdown
+        .flatMap((leg) => [leg.originZone, leg.destinationZone, leg.appliedZone])
+        .filter((z): z is number => z != null);
+    const zonesCovered = Array.from(new Set(zoneIds)).sort((a, b) => a - b);
+    const zoneText = serviceType === 'As Directed'
+        ? ''
+        : includesZoneOneToFour && zonesCovered.length
+            ? `Zones detected: ${zonesCovered.map((z) => `Zone ${z}`).join(', ')}`
+            : '';
 
     const handleAddStop = () => {
         setDropOffs([...dropOffs, '']);
@@ -661,6 +776,7 @@ const BookingPage: React.FC = () => {
                         <p className="text-sm text-amber-200/80">Live fare estimate</p>
                         <p className="text-4xl font-bold text-amber-400 my-1">{fareDisplay}</p>
                         <p className="text-xs text-gray-400">{extrasText}</p>
+                        {zoneText ? <p className="text-xs text-gray-500 mt-1">{zoneText}</p> : null}
                     </div>
 
 
