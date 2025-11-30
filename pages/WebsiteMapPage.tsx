@@ -18,7 +18,7 @@ const sitemapSections: SitemapSection[] = [
       { label: 'Our Blog', to: '/blog' },
       { label: 'Client Reviews', to: '/reviews' },
       { label: 'Contact', to: '/contact' },
-      { label: 'Website Map', to: '/website-map', note: 'You are here' }
+      { label: 'Sitemap', to: '/website-map', note: 'You are here' }
     ]
   },
   {
@@ -64,26 +64,19 @@ const WebsiteMapPage: React.FC = () => {
       <div className="max-w-6xl mx-auto space-y-10">
         <div className="space-y-3">
           <p className="text-sm uppercase tracking-[0.3em] text-amber-300/70">Navigate</p>
-          <h1 className="text-4xl md:text-5xl font-display font-bold text-white">Website Map</h1>
-          <p className="text-lg text-gray-300 max-w-3xl">
-            Quickly jump to any area of Velvet Drivers. Every key destination is grouped so you
-            can find the right page without digging through menus.
-          </p>
+          <h1 className="text-4xl md:text-5xl font-display font-bold text-white">Sitemap</h1>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
           {sitemapSections.map((section) => (
             <section
               key={section.title}
-              className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-md p-6 shadow-2xl shadow-red-950/50"
+              className="p-0"
             >
               <div className="flex items-center justify-between gap-4 mb-4">
                 <div>
                   <h2 className="text-xl font-display font-semibold text-amber-300">{section.title}</h2>
                   <p className="text-sm text-gray-400">{section.description}</p>
-                </div>
-                <div className="h-10 w-10 rounded-full bg-amber-400/10 border border-amber-400/30 flex items-center justify-center text-amber-300 text-xs font-semibold">
-                  {section.links.length.toString().padStart(2, '0')}
                 </div>
               </div>
               <div className="grid sm:grid-cols-2 gap-3">
@@ -91,7 +84,7 @@ const WebsiteMapPage: React.FC = () => {
                   <Link
                     key={link.label}
                     to={link.to}
-                    className="group flex items-center justify-between rounded-lg border border-white/5 bg-black/30 px-4 py-3 text-sm text-gray-200 hover:border-amber-400/70 hover:text-white transition-all"
+                    className="group flex items-center justify-between px-0 py-2 text-sm text-gray-200 hover:text-white transition-all border-b border-white/10"
                   >
                     <span className="flex flex-col">
                       {link.label}

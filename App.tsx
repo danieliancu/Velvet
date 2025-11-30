@@ -53,6 +53,7 @@ import BlogPage from './pages/BlogPage';
 import BlogArticlePage from './pages/BlogArticlePage';
 import ReviewsPage from './pages/ReviewsPage';
 import WebsiteMapPage from './pages/WebsiteMapPage';
+import AboutUsPage from './pages/AboutUsPage';
 
 // --- AUTH CONTEXT ---
 interface AuthContextType {
@@ -161,6 +162,7 @@ function App() {
             <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:slug" element={<BlogArticlePage />} />
             <Route path="/reviews" element={<ReviewsPage />} />
+            <Route path="/about" element={<AboutUsPage />} />
             <Route path="/admin" element={<AdminLoginPage />} />
             
             <Route path="/legal/safety-accessibility" element={<SafetyAccessibilityPage />} />

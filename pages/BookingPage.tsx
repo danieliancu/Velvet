@@ -386,7 +386,12 @@ const BookingPage: React.FC = () => {
     };
 
     const milesValue = Number(miles) || 0;
-    const isAirportOrTerminal = (value: string) => /(airport|terminal)/i.test(value);
+    const isAirportOrTerminal = (value: string) => {
+        const lowered = value.toLowerCase();
+        if (/(airport|terminal)/i.test(value)) return true;
+        // Explicit fallback for Google’s Luton drop-off label
+        return lowered.includes('express drop off, luton lu2, uk');
+    };
     const airportDetected = isAirportOrTerminal(pickup) || dropOffs.some((addr) => isAirportOrTerminal(addr));
 
     const getMileageRate = (veh: string, dist: number) => {
