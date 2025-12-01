@@ -130,7 +130,7 @@ const awaitingDrivers: AwaitingDriver[] = [
   }
 ];
 
-const tabs = ['Details', 'Car(s)'] as const;
+const tabs = ['Details', 'Car(s)', 'Documents Uploaded', 'Approve Now!'] as const;
 
 const AwaitingApprovalPage: React.FC = () => {
   const [query, setQuery] = useState('');
@@ -206,13 +206,6 @@ const AwaitingApprovalPage: React.FC = () => {
                           {tab}
                         </button>
                       ))}
-                    <button
-                      type="button"
-                      className="rounded-full border border-emerald-500 bg-emerald-500 px-5 py-2 text-sm font-semibold text-white"
-                    >
-                      Approve Now!
-                    </button>
-
                     </nav>
                   </div>
 
@@ -243,7 +236,7 @@ const AwaitingApprovalPage: React.FC = () => {
 
                   {getActiveTab(driver.id) === 'Car(s)' && (
                     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                      {(awaitingDrivers[0].cars ?? []).map((car) => (
+                      {driver.cars.map((car) => (
                         <div key={`${driver.id}-${car.vrm}`} className="rounded-2xl border border-amber-900/50 bg-gradient-to-br from-[#1E1212] via-[#100808] to-black p-4">
                           <div className="flex items-center justify-between">
                             <div>
@@ -263,6 +256,26 @@ const AwaitingApprovalPage: React.FC = () => {
                           </div>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {getActiveTab(driver.id) === 'Documents Uploaded' && (
+                    <div className="rounded-2xl border border-amber-900/50 bg-gradient-to-br from-[#1E1212] via-[#100808] to-black p-4 text-sm text-gray-300">
+                      <p className="text-gray-400">Awaiting document review.</p>
+                    </div>
+                  )}
+
+                  {getActiveTab(driver.id) === 'Approve Now!' && (
+                    <div className="rounded-2xl border border-emerald-500/30 bg-emerald-900/20 p-4 flex flex-wrap items-center justify-between gap-3">
+                      <div className="text-sm text-gray-200">
+                        Confirm this driver meets all requirements.
+                      </div>
+                      <button
+                        type="button"
+                        className="rounded-full bg-emerald-500 text-black px-6 py-2 text-sm font-semibold hover:bg-emerald-400 transition shadow-[0_0_15px_rgba(52,211,153,0.4)]"
+                      >
+                        Approve Now!
+                      </button>
                     </div>
                   )}
                 </article>

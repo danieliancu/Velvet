@@ -123,13 +123,16 @@ const buildBookingSummary = (booking: LiveBooking) => {
   return `Time: ${booking.time}\nDate: ${booking.date}\nPassenger: ${booking.passenger}\nPhone: ${booking.phone}\n\n${pickupLine}\n\nTO\n\n${dropOffLine}\n\nPrice:  ${booking.priceDetails}\n\nNotes: ${booking.notes}`;
 };
 const AdminDashboardPage: React.FC = () => {
+  const [liveBookings, setLiveBookings] = useState<LiveBooking[]>(mockLiveBookings);
   const [clientConfirmed, setClientConfirmed] = useState<Record<string, boolean>>({});
   const [driverConfirmed, setDriverConfirmed] = useState<Record<string, boolean>>({});
   const [whatsappOpen, setWhatsappOpen] = useState<Record<string, boolean>>({});
   const [driverMessages, setDriverMessages] = useState<Record<string, string>>({});
   const [driversExpanded, setDriversExpanded] = useState<Record<string, boolean>>({});
   const [pendingDriverConfirmKey, setPendingDriverConfirmKey] = useState<string | null>(null);
+  const [pendingClientConfirmId, setPendingClientConfirmId] = useState<string | null>(null);
   const [historyToggle, setHistoryToggle] = useState<Record<string, boolean>>({});
+  // Manual booking modal removed; navigate to booking page instead.
 
   const hasDriverConfirmation = (booking: LiveBooking) =>
     booking.drivers.some((driverId) => {
@@ -140,8 +143,8 @@ const AdminDashboardPage: React.FC = () => {
   const isBookingCompleted = (booking: LiveBooking) =>
     Boolean(clientConfirmed[booking.id]) && hasDriverConfirmation(booking);
 
-  const activeBookings = mockLiveBookings.filter((booking) => !isBookingCompleted(booking));
-  const completedLiveBookings = mockLiveBookings.filter(isBookingCompleted);
+  const activeBookings = liveBookings.filter((booking) => !isBookingCompleted(booking));
+  const completedLiveBookings = liveBookings.filter(isBookingCompleted);
   const jobsDoneEntries = completedLiveBookings;
 
   const pendingClientConfirmations = activeBookings.filter(
@@ -219,6 +222,24 @@ const AdminDashboardPage: React.FC = () => {
     setDriverMessages((prev) => ({ ...prev, [driverKey]: '' }));
   };
 
+  const requestClientConfirmation = (bookingId: string) => {
+    if (clientConfirmed[bookingId]) {
+      toggleClientConfirmation(bookingId);
+      return;
+    }
+    setPendingClientConfirmId(bookingId);
+  };
+
+  const handleConfirmClient = () => {
+    if (!pendingClientConfirmId) return;
+    toggleClientConfirmation(pendingClientConfirmId);
+    setPendingClientConfirmId(null);
+  };
+
+  const handleCancelClient = () => {
+    setPendingClientConfirmId(null);
+  };
+
   const handleReturnToLive = (booking: LiveBooking) => {
     setClientConfirmed((prev) => ({ ...prev, [booking.id]: false }));
     setDriverConfirmed((prev) => {
@@ -236,6 +257,16 @@ const AdminDashboardPage: React.FC = () => {
       <div className="w-full flex-grow p-4 sm:p-6 md:p-8">
         <div className="max-w-6xl mx-auto w-full space-y-8">
           <AdminPageHeader active="live" liveBadgeCount={liveBadgeCount} />
+
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={() => window.location.assign('#/booking')}
+              className="px-4 py-2 text-sm font-semibold rounded-md bg-amber-500 text-black hover:bg-amber-400 transition shadow-[0_0_12px_rgba(251,191,36,0.4)]"
+            >
+              Add manual booking
+            </button>
+          </div>
 
           <main className="w-full space-y-6">
             <section className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 space-y-6">
@@ -275,6 +306,7 @@ const AdminDashboardPage: React.FC = () => {
                               Price:{' '}
                               <span className="font-semibold text-white">{booking.priceDetails}</span>
                             </p>
+                            <p className="text-sm text-gray-300">Booked by: Roxana Viulet</p>
                             <p className="text-xs text-gray-400">Notes: {booking.notes}</p>
                           </div>
                           <div className="flex flex-wrap items-center gap-4 pt-2">
@@ -284,7 +316,7 @@ const AdminDashboardPage: React.FC = () => {
                             </div>
                             <button
                               type="button"
-                              onClick={() => toggleClientConfirmation(booking.id)}
+                              onClick={() => requestClientConfirmation(booking.id)}
                               className={`flex items-center gap-2 text-sm font-semibold transition ${
                                 confirmed ? 'text-green-400' : 'text-gray-300'
                               }`}
@@ -476,32 +508,41 @@ const AdminDashboardPage: React.FC = () => {
                         {(() => {
                           const isCompleted = historyToggle[booking.id] ?? false;
                           return (
-                            <button
-                              type="button"
-                              onClick={() => toggleHistoryStatus(booking.id)}
-                              className={`text-[11px] font-semibold uppercase tracking-[0.3em] rounded-full px-3 py-1 transition flex items-center gap-1 ${
-                                isCompleted
-                                  ? 'border border-green-300 text-green-300 hover:bg-green-300 hover:text-black'
-                                  : 'border border-amber-300 bg-amber-300 text-black hover:brightness-110'
-                              }`}
-                            >
-                              <span
-                                className={`flex h-3 w-3 items-center justify-center rounded-full text-[10px] ${
-                                  isCompleted ? 'bg-green-300 text-black' : 'bg-black text-amber-300'
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => toggleHistoryStatus(booking.id)}
+                                className={`text-[11px] font-semibold uppercase tracking-[0.3em] rounded-full px-3 py-1 transition flex items-center gap-1 ${
+                                  isCompleted
+                                    ? 'border border-green-300 text-green-300 hover:bg-green-300 hover:text-black'
+                                    : 'border border-amber-300 bg-amber-300 text-black hover:brightness-110'
                                 }`}
                               >
-                                {isCompleted ? (
-                                  <svg viewBox="0 0 8 8" className="h-2 w-2" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M1 3.5L3.2 5.6 7 1.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                                  </svg>
-                                ) : (
-                                  <svg viewBox="0 0 12 12" className="h-2.5 w-2.5" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M2 6h8M6 2v8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
-                                  </svg>
-                                )}
-                              </span>
-                              {isCompleted ? 'Completed' : 'Allocated'}
-                            </button>
+                                <span
+                                  className={`flex h-3 w-3 items-center justify-center rounded-full text-[10px] ${
+                                    isCompleted ? 'bg-green-300 text-black' : 'bg-black text-amber-300'
+                                  }`}
+                                >
+                                  {isCompleted ? (
+                                    <svg viewBox="0 0 8 8" className="h-2 w-2" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <path d="M1 3.5L3.2 5.6 7 1.2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                                    </svg>
+                                  ) : (
+                                    <svg viewBox="0 0 12 12" className="h-2.5 w-2.5" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <path d="M2 6h8M6 2v8" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                                    </svg>
+                                  )}
+                                </span>
+                                {isCompleted ? 'Completed' : 'Allocated'}
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleReturnToLive(booking)}
+                                className="text-[11px] font-semibold uppercase tracking-[0.3em] rounded-full px-3 py-1 transition flex items-center gap-1 border border-red-400 bg-red-500 text-white hover:bg-red-400"
+                              >
+                                Cancel
+                              </button>
+                            </div>
                           );
                         })()}
                       </div>
@@ -540,6 +581,31 @@ const AdminDashboardPage: React.FC = () => {
         </div>
       </div>
     </div>
+
+      {pendingClientConfirmId && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">
+          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-gray-900/90 p-6 shadow-2xl">
+            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-amber-300 mb-3">Client confirmation</p>
+            <p className="text-lg text-white mb-6">Confirm client approval for this booking?</p>
+            <div className="flex flex-wrap gap-3 justify-end">
+              <button
+                type="button"
+                onClick={handleCancelClient}
+                className="rounded-full border border-white/20 px-4 py-2 text-sm font-semibold text-gray-200 hover:border-white/40 transition"
+              >
+                No
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmClient}
+                className="rounded-full border border-amber-400 bg-amber-400 px-5 py-2 text-sm font-semibold text-black shadow-[0_0_20px_rgba(251,191,36,0.4)] hover:shadow-[0_0_30px_rgba(251,191,36,0.6)] transition"
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {pendingDriverConfirmKey && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4">

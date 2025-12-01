@@ -25,6 +25,7 @@ const DriverSignUpPage: React.FC = () => {
   const { showAlert } = useAlert();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<Record<string, string>>({});
+  const [isFindingVehicle, setIsFindingVehicle] = useState(false);
 
   const handleFieldChange =
     (field: string) => (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,14 +125,58 @@ const DriverSignUpPage: React.FC = () => {
             />
             <button
               type="button"
-              className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black bg-amber-400 rounded-md shadow-md shadow-amber-400/40"
+              onClick={async () => {
+                const registrationNumber = (formData.vehicleReg ?? '').trim().toUpperCase();
+                if (!registrationNumber) {
+                  showAlert('Please enter a VRM before searching.');
+                  return;
+                }
+                setIsFindingVehicle(true);
+                try {
+                  const apiKey = import.meta.env.VITE_DVLA_API_KEY;
+                  const proxy = import.meta.env.VITE_DVLA_PROXY_URL;
+                  if (!apiKey || !proxy) {
+                    showAlert('DVLA lookup unavailable. Configure VITE_DVLA_API_KEY and VITE_DVLA_PROXY_URL.');
+                    return;
+                  }
+                  const dvlaBaseUrl = proxy.replace(/\/$/, '');
+                  const response = await fetch(`${dvlaBaseUrl}/vehicle-enquiry/v1/vehicles`, {
+                    method: 'POST',
+                    headers: {
+                      'Content-Type': 'application/json',
+                      'x-api-key': apiKey
+                    },
+                    body: JSON.stringify({ registrationNumber })
+                  });
+                  if (!response.ok) {
+                    if (response.status === 404) {
+                      showAlert('DVLA: vehicle not found for that VRM.');
+                      setFormData((prev) => ({ ...prev, make: '', model: '' }));
+                      return;
+                    }
+                    showAlert(`DVLA lookup failed (${response.status}).`);
+                    return;
+                  }
+                  const data = await response.json();
+                  setFormData((prev) => ({
+                    ...prev,
+                    make: data.make || prev.make || '',
+                    model: data.model || prev.model || ''
+                  }));
+                  showAlert('Vehicle found via DVLA. Fields updated.');
+                } catch (err) {
+                  console.error('DVLA lookup error', err);
+                  showAlert('Could not reach DVLA. Please try again.');
+                } finally {
+                  setIsFindingVehicle(false);
+                }
+              }}
+              disabled={isFindingVehicle}
+              className="px-4 py-2 text-xs font-semibold uppercase tracking-wider text-black bg-amber-400 rounded-md shadow-md shadow-amber-400/40 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Find
+              {isFindingVehicle ? 'Finding...' : 'Find'}
             </button>
           </div>
-          <p className="text-xs text-gray-500">
-            Link to DVLA API to find Make and Model.
-          </p>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Input
               id="make"
@@ -294,6 +339,24 @@ const DriverSignUpPage: React.FC = () => {
               onChange={handleFieldChange('accountNumber')}
             />
           </div>
+        </div>
+        <div className="space-y-2 pt-2">
+          <label className="flex items-start gap-3 text-sm text-gray-200">
+            <input
+              type="checkbox"
+              required
+              className="mt-1 h-4 w-4 rounded border-gray-500 text-amber-500 focus:ring-amber-500"
+            />
+            <span>I agree to the Terms &amp; Conditions.</span>
+          </label>
+          <label className="flex items-start gap-3 text-sm text-gray-200">
+            <input
+              type="checkbox"
+              required
+              className="mt-1 h-4 w-4 rounded border-gray-500 text-amber-500 focus:ring-amber-500"
+            />
+            <span>I consent to data processing under the Privacy Policy.</span>
+          </label>
         </div>
       </div>
     );

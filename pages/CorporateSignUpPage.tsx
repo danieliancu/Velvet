@@ -179,12 +179,21 @@ const CorporateSignUpPage: React.FC = () => {
         value={formData.estimatedJourneys ?? ''}
         onChange={handleFieldChange('estimatedJourneys')}
       />
-      <Input
-        id="vehicleTypes"
-        label="Preferred Vehicle Types"
-        value={formData.vehicleTypes ?? ''}
-        onChange={handleFieldChange('vehicleTypes')}
-      />
+      <div>
+        <label className="block text-sm font-semibold text-gray-200 mb-2">Preferred Vehicle Types</label>
+        <select
+          className="w-full rounded-xl border border-white/15 bg-black/50 px-3 py-2 text-sm text-white"
+          value={formData.vehicleTypes ?? ''}
+          onChange={handleFieldChange('vehicleTypes')}
+        >
+          <option value="" disabled>
+            Select vehicle type
+          </option>
+          <option value="Luxury MPV">Luxury MPV</option>
+          <option value="Luxury">Luxury</option>
+          <option value="Executive">Executive</option>
+        </select>
+      </div>
       <div>
         <label htmlFor="serviceNotes" className="block text-sm font-semibold text-gray-200 mb-2">
           Additional Notes / Special Requirements

@@ -26,7 +26,7 @@ const OlderBookingsList: React.FC<{ className?: string }> = ({ className = '' })
     }
     const searchTerm = query.toLowerCase();
     return olderBookingsData.filter((booking) => {
-      const haystack = `${booking.id} ${booking.pickup} ${booking.dropOffs.join(' ')} ${booking.passengerName} ${booking.driverName} ${booking.vehicle} ${booking.notes}`.toLowerCase();
+      const haystack = `${booking.id} ${booking.pickup} ${booking.dropOffs.join(' ')} ${booking.passengerName} ${booking.passengerPhone} ${booking.driverName} ${booking.vehicle} ${booking.notes} ${booking.bookedBy} ${booking.method} ${booking.bookingCreated}`.toLowerCase();
       return haystack.includes(searchTerm);
     });
   }, [query]);
@@ -84,27 +84,34 @@ const OlderBookingsList: React.FC<{ className?: string }> = ({ className = '' })
                           <div className="space-y-1">
                             <p className="text-xs uppercase tracking-wider text-amber-300">
                               Booking #{booking.id}
+                              {booking.bookingCreated ? `. Created: ${booking.bookingCreated}` : ''}
+                              {booking.bookingAccepted ? `. Accepted: ${booking.bookingAccepted}` : ''}
                             </p>
                             <p className="text-sm text-gray-400">
-                              {booking.time} · {booking.vehicle} · {booking.numberPlate}
+                              {booking.vehicle} · {booking.numberPlate}
                             </p>
                           </div>
                           <div>
                             <h3 className="text-xl font-semibold text-white">{booking.pickup}</h3>
                             <p className="text-sm text-gray-400">{booking.dropOffs.join(' · ')}</p>
                           </div>
-                          <p className="text-sm text-gray-300">
-                            Passenger: {booking.passengerName} · Phone: {booking.passengerPhone}
-                          </p>
+                          <div className="space-y-1 text-sm text-gray-200">
+                            <p>Passenger: {booking.passengerName} · Phone: {booking.passengerPhone}</p>
+                            <p>Fare quoted: £{booking.fareQuoted.toFixed(2)}</p>
+                            <p>Booked by: {booking.bookedBy}</p>
+                          </div>
                           <p className="text-xs text-gray-400">Notes: {booking.notes}</p>
                         </div>
                         <div className="space-y-2 rounded-2xl border border-white/10 bg-black/40 p-4 lg:basis-[45%]">
-                          <p className="text-sm font-semibold text-white">{booking.driverName}</p>
-                          {driverInfo && (
+                          <p className="text-sm font-semibold text-white">Driver contact</p>
+                          {driverInfo ? (
                             <>
+                              <p className="text-xs text-gray-400">Name: {booking.driverName}</p>
                               <p className="text-xs text-gray-400">Phone: {driverInfo.phone}</p>
                               <p className="text-xs text-gray-400">Email: {driverInfo.email}</p>
                             </>
+                          ) : (
+                            <p className="text-xs text-gray-500">No driver contact on file.</p>
                           )}
                         </div>
                       </div>

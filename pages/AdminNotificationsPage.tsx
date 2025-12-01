@@ -1,4 +1,5 @@
 import React from 'react';
+import { Search } from 'lucide-react';
 import AdminPageHeader from '../components/AdminPageHeader';
 
 type Severity = 'critical' | 'warning' | 'info' | 'success';
@@ -131,7 +132,7 @@ const severityStyleMap: Record<
   }
 };
 
-const notificationActions = ['Go To', 'Archive', 'Delete', 'Save'] as const;
+const notificationActions = ['Archive', 'Delete'] as const;
 
 const severityRank: Record<Severity, number> = {
   critical: 0,
@@ -146,11 +147,27 @@ const formatDateTime = (iso: string) =>
   );
 
 const AdminNotificationsPage: React.FC = () => {
-  const sortedNotifications = [...notifications].sort((a, b) => {
+  const [query, setQuery] = React.useState('');
+  const [expanded, setExpanded] = React.useState<Record<string, boolean>>({});
+
+  const filtered = React.useMemo(() => {
+    if (!query.trim()) return notifications;
+    const q = query.toLowerCase();
+    return notifications.filter((item) => {
+      const haystack = `${item.id} ${item.category} ${item.title} ${item.message} ${item.tags.join(' ')}`.toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [query]);
+
+  const sortedNotifications = [...filtered].sort((a, b) => {
     const severityDiff = severityRank[a.severity] - severityRank[b.severity];
     if (severityDiff !== 0) return severityDiff;
     return new Date(b.datetime).getTime() - new Date(a.datetime).getTime();
   });
+
+  const toggleExpand = (id: string) => {
+    setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
@@ -158,7 +175,20 @@ const AdminNotificationsPage: React.FC = () => {
         <div className="max-w-6xl mx-auto w-full space-y-8">
           <AdminPageHeader active="notifications" />
 
-          <main className="w-full">
+          <main className="w-full space-y-4">
+            <div className="relative">
+              <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                <Search size={16} />
+              </span>
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search any notification..."
+                className="w-full rounded-2xl border border-white/10 bg-black/40 px-10 py-3 text-white placeholder-gray-500 focus:border-amber-400 focus:outline-none"
+              />
+            </div>
+
             <section className="bg-gray-900/50 border border-gray-800 rounded-2xl p-6 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
@@ -171,27 +201,53 @@ const AdminNotificationsPage: React.FC = () => {
               <div className="space-y-3">
                 {sortedNotifications.map((item) => {
                   const styles = severityStyleMap[item.severity];
+                  const isOpen = expanded[item.id] ?? false;
                   return (
                     <article
                       key={item.id}
                       className={`rounded-2xl border p-4 md:p-5 shadow-lg ${styles.card}`}
                     >
                       <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div className="flex items-center gap-2">
-                          <span className={`text-[11px] font-semibold uppercase tracking-[0.3em] ${styles.accent}`}>
-                            {item.category}
-                          </span>
-                          <span className={`text-[11px] px-2 py-1 rounded-full font-bold uppercase ${styles.pill}`}>
-                            {styles.label}
-                          </span>
+                        <div className="flex items-center gap-3">
+                          <button
+                            type="button"
+                            onClick={() => toggleExpand(item.id)}
+                            className="h-7 w-7 flex items-center justify-center rounded-full border border-white/15 text-gray-200 hover:border-amber-400 hover:text-amber-300 transition"
+                            aria-label={isOpen ? 'Collapse notification' : 'Expand notification'}
+                          >
+                            <span className={`transition-transform ${isOpen ? 'rotate-180' : ''}`}>▼</span>
+                          </button>
+                          <div className="flex items-center gap-2">
+                            <span className={`text-[11px] font-semibold uppercase tracking-[0.3em] ${styles.accent}`}>
+                              {item.category}
+                            </span>
+                            <span className={`text-[11px] px-2 py-1 rounded-full font-bold uppercase ${styles.pill}`}>
+                              {styles.label}
+                            </span>
+                          </div>
                         </div>
-                        <p className="text-xs text-gray-300">{formatDateTime(item.datetime)}</p>
+                        <div className="flex items-center gap-3">
+                          <p className="text-xs text-gray-300">{formatDateTime(item.datetime)}</p>
+                          <div className="flex flex-wrap gap-2">
+                            {notificationActions.map((action) => (
+                              <button
+                                key={`${item.id}-${action}`}
+                                type="button"
+                                className={`px-3 py-1 text-xs font-semibold rounded-full border transition ${styles.button}`}
+                              >
+                                {action}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
                       </div>
-                      <div className="mt-3 flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                        <div className="space-y-1">
-                          <h3 className="text-lg font-semibold text-white">{item.title}</h3>
-                          <p className="text-sm text-gray-300">{item.message}</p>
-                          <div className="flex flex-wrap gap-2 pt-2">
+                      {isOpen && (
+                        <div className="mt-3 space-y-3">
+                          <div className="space-y-1">
+                            <h3 className="text-lg font-semibold text-white">{item.title}</h3>
+                            <p className="text-sm text-gray-300">{item.message}</p>
+                          </div>
+                          <div className="flex flex-wrap gap-2">
                             {item.tags.map((tag) => (
                               <span
                                 key={`${item.id}-${tag}`}
@@ -202,18 +258,7 @@ const AdminNotificationsPage: React.FC = () => {
                             ))}
                           </div>
                         </div>
-                        <div className="flex flex-wrap gap-2">
-                          {notificationActions.map((action) => (
-                            <button
-                              key={`${item.id}-${action}`}
-                              type="button"
-                              className={`px-3 py-1 text-xs font-semibold rounded-full border transition ${styles.button}`}
-                            >
-                              {action}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
+                      )}
                     </article>
                   );
                 })}

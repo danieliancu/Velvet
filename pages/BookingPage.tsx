@@ -75,6 +75,7 @@ const BookingPage: React.FC = () => {
     const smallSuitcasesCount = Math.max(0, Number(smallSuitcases) || 0);
     const largeSuitcasesCount = Math.max(0, Number(largeSuitcases) || 0);
     const waitingMinutes = Math.max(0, Number(waiting) || 0);
+    const todayIso = new Date().toISOString().slice(0, 10);
 
     const LONDON_CENTER = { lat: 51.509865, lng: -0.118092 }; // Charing Cross
     // Zones are concentric rings around central London; tweak radii to match your own map pricing.
@@ -748,6 +749,7 @@ const BookingPage: React.FC = () => {
                                 id="date"
                                 type="date"
                                 inputMode="numeric"
+                                min={todayIso}
                                 placeholder="yyyy-mm-dd"
                                 icon={<Calendar size={20} className="text-gray-400" />}
                                 value={date}
@@ -814,15 +816,6 @@ const BookingPage: React.FC = () => {
                             value={specialEvents}
                             onChange={(e) => setSpecialEvents(e.target.value)}
                         />
-                        <div className="flex justify-end">
-                            <button
-                                type="button"
-                                onClick={() => navigate('/contact')}
-                                className="px-4 py-2 text-sm font-semibold bg-transparent border border-amber-600 text-amber-400 rounded-md hover:bg-amber-900/50 transition-colors"
-                            >
-                                Contact us
-                            </button>
-                        </div>
                     </div>
 
 
@@ -850,7 +843,7 @@ const BookingPage: React.FC = () => {
                     {/* Action Buttons */}
                     <div className="flex flex-col sm:flex-row items-center justify-start gap-4 pt-4 border-t border-amber-900/50">
                         <button type="submit" className="w-full sm:w-auto px-8 py-3 font-semibold bg-amber-500 text-black rounded-lg hover:bg-amber-400 transition-all duration-300 transform hover:scale-105 shadow-[0_0_15px_rgba(251,191,36,0.5)]">
-                            Confirm Booking
+                            Send Booking Request
                         </button>
                          <button type="button" className="w-full sm:w-auto px-8 py-3 font-semibold bg-transparent border-2 border-amber-600 text-amber-400 rounded-lg hover:bg-amber-900/50 transition-colors">
                             Save Quote

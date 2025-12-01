@@ -488,12 +488,17 @@ const CarsPage: React.FC = () => {
                 authTokenRef.current = await authenticateWithDvla();
             }
 
-            const dvlaBaseUrl = import.meta.env.VITE_DVLA_PROXY_URL || '/api/dvla';
+            const dvlaProxy = import.meta.env.VITE_DVLA_PROXY_URL;
+            if (!dvlaProxy) {
+                showAlert('DVLA proxy is missing (VITE_DVLA_PROXY_URL). Direct DVLA calls are blocked by CORS.');
+                return;
+            }
+            const dvlaBaseUrl = dvlaProxy.replace(/\/$/, '');
             const response = await fetch(`${dvlaBaseUrl}/vehicle-enquiry/v1/vehicles`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    // Proxy injects the API key; keep header for fallback/non-proxied environments.
+                    // Proxy injects the API key; keep header for fallback/non-proxied environments (direct DVLA endpoint).
                     'x-api-key': apiKey,
                     ...(authTokenRef.current ? { Authorization: `Bearer ${authTokenRef.current}` } : {})
                 },
@@ -702,7 +707,14 @@ const CarsPage: React.FC = () => {
                         <p className="text-xs text-amber-200/60 mt-1">Uses DVLA Vehicle Enquiry Service; model may need manual entry.</p>
                     </div>
                     
-                    <DashboardInput id="make" label="Make" type="text" value={make} readOnly />
+                    <DashboardInput
+                        id="make"
+                        label="Make"
+                        type="text"
+                        value={make}
+                        onChange={(e) => setMake(e.target.value)}
+                        placeholder="Enter make"
+                    />
                     <DashboardInput
                         id="model"
                         label="Model"

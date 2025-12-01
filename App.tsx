@@ -54,6 +54,7 @@ import BlogArticlePage from './pages/BlogArticlePage';
 import ReviewsPage from './pages/ReviewsPage';
 import WebsiteMapPage from './pages/WebsiteMapPage';
 import AboutUsPage from './pages/AboutUsPage';
+import AdminStatementsPage from './pages/AdminStatementsPage';
 
 // --- AUTH CONTEXT ---
 interface AuthContextType {
@@ -215,6 +216,11 @@ function App() {
             <Route path="/admin/dashboard" element={
               <ProtectedRoute allowedRoles={[Role.ADMIN]}>
                 <AdminDashboardPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/statements" element={
+              <ProtectedRoute allowedRoles={[Role.ADMIN]}>
+                <AdminStatementsPage />
               </ProtectedRoute>
             } />
             <Route path="/admin/settings" element={

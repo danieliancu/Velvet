@@ -28,6 +28,25 @@ const ClientSignUpPage: React.FC = () => {
                 <Input id="password" label="Create Password" type="password" required />
                 <Input id="repeatPassword" label="Repeat Password" type="password" required />
 
+                <div className="space-y-2 pt-2">
+                    <label className="flex items-start gap-3 text-sm text-gray-200">
+                        <input
+                            type="checkbox"
+                            required
+                            className="mt-1 h-4 w-4 rounded border-gray-500 text-amber-500 focus:ring-amber-500"
+                        />
+                        <span>I agree to the Terms &amp; Conditions.</span>
+                    </label>
+                    <label className="flex items-start gap-3 text-sm text-gray-200">
+                        <input
+                            type="checkbox"
+                            required
+                            className="mt-1 h-4 w-4 rounded border-gray-500 text-amber-500 focus:ring-amber-500"
+                        />
+                        <span>I consent to data processing under the Privacy Policy.</span>
+                    </label>
+                </div>
+
                 <div className="pt-4">
                     <button
                         type="submit"
